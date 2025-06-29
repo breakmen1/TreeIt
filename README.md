@@ -1,4 +1,4 @@
-# TeamManager
+# TreeIt
 ## Prerequisites
 
 Before running the project, ensure the following are installed and configured:
