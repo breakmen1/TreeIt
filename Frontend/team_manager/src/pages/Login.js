@@ -10,7 +10,7 @@ function Login({ onLogin }) {
         try {
             console.log(form)
             const res = await api.post('/auth/login', form);
-            onLogin(res.data); // or store JWT if using
+            onLogin(res.data); 
             console.log(res.data)
         } catch (err) {
             setError('Login failed. Please check credentials.');
