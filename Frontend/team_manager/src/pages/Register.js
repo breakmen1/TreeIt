@@ -7,7 +7,7 @@ function Register() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        try {
+        try {// SURAJ
             console.log(form);
             await api.post('/auth/register', form);
             setMessage('Registration successful. Please login.');
