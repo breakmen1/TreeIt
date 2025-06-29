@@ -21,8 +21,11 @@ public class Member {
     @Column(name = "MEMBER_ID")
     private Long memberId;
 
-    @Column(name = "NAME")
-    private String name;
+    @Column(name = "USERNAME", unique = true, nullable = false)
+    private String username;
+
+    @Column(name = "PASSWORD", nullable = false)
+    private String password;
 
     @Column(name = "ROLE")
     private String role;
