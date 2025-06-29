@@ -24,6 +24,9 @@ public class Member {
     @Column(name = "USERNAME", unique = true, nullable = false)
     private String username;
 
+    @Column(name = "NAME", nullable = false)
+    private String name;
+
     @Column(name = "PASSWORD", nullable = false)
     private String password;
 
