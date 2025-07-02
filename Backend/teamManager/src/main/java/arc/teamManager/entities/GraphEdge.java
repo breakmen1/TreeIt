@@ -1,5 +1,7 @@
 package arc.teamManager.entities;
 
+import java.time.LocalDateTime;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -11,25 +13,22 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "NODE")
+@Table(name = "GRAPH_EDGE")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Node {
+public class GraphEdge {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "NODE_ID")
-    private Long nodeId;
+    @Column(name = "GraphEdge_ID")
+    private Long graphEdgeId;
 
     @Column(name = "PROJECT_ID")
     private Long projectId;
 
-    @Column(name = "PARENT_NODE")
-    private Long parentNode;
+    @Column(name = "SOURCE")
+    private String source;
 
-    @Column(name = "CHILD_NODE")
-    private Long childNode;
-
-    @Column(name = "ASSIGNED_TO")
-    private String assignedTo;
+    @Column(name = "TARGET")
+    private String target;
 }
