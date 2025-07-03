@@ -1,5 +1,7 @@
 import React, { useCallback, useState, useEffect, useRef } from "react";
 import CircleNode from "./CircleNode";
+import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -28,22 +30,24 @@ const nodeTypes = {
 const initialNodes = [
   {
     id: "1",
-    type: "circle", // ✅ add this
-    position: { x: 500, y: 100 },
+    type: "circle",
+    position: { x: 500, y: 200 },
     data: {
-      label: "",
-      description: "This is the context menu node", // ✅ add this
-      color: "#98FB98",
+      projectId: 1,
+      task: "This updates something important",
+      assignedTo: "Akash",
+      status: "unpicked",
     },
   },
   {
     id: "2",
-    type: "circle", // ✅ add this
+    type: "circle",
     position: { x: 500, y: 200 },
     data: {
-      label: "",
-      description: "This updates something important", // ✅ add this
-      color: "#AFEEEE",
+      projectId: 1,
+      task: "This updates something important",
+      assignedTo: "Abhay",
+      status: "unpicked",
     },
   },
 ];
@@ -78,6 +82,40 @@ const Content = () => {
   });
   const { setViewport } = useReactFlow();
   const { getNodes } = useReactFlow();
+
+  useEffect(() => {
+    const fetchGraphData = async () => {
+      try {
+        const res = await axios.get("http://localhost:2999/load");
+
+        const backendNodes = res.data.nodes.map((node) => ({
+          id: node.graphNodeId.toString(),
+          type: "circle",
+          position: { x: node.posX, y: node.posY },
+          data: {
+            projectId: node.projectId,
+            task: node.label,
+            assignedTo: node.assignedTo,
+            status: node.status,
+          },
+        }));
+
+        const backendEdges = res.data.edges.map((edge) => ({
+          id: edge.graphEdgeId?.toString() || `e${edge.source}-${edge.target}`,
+          source: edge.source.toString(),
+          target: edge.target.toString(),
+        }));
+
+        setNodes(backendNodes);
+        setEdges(backendEdges);
+      } catch (err) {
+        console.error("❌ Failed to fetch graph data", err);
+      }
+    };
+
+    fetchGraphData();
+  }, []);
+
   const onClick = () => {
     // we calculate a transform for the nodes so that all nodes are visible
     // we then overwrite the transform of the `.react-flow__viewport` element
@@ -186,14 +224,22 @@ const Content = () => {
     // };
 
     const newNode = {
-      id: newNodeInput.id.length > 0 ? newNodeInput.id : getId(),
-      type: "circle", // ✅ important
-      position: { x: 400, y: 50 },
+      // id: newNodeInput.id.length > 0 ? newNodeInput.id : getId(),
+      // type: "circle", // ✅ important
+      // position: { x: 400, y: 50 },
+      // data: {
+      //   projectId : 1,
+      //   task: "This updates something important",
+      //   assignedTo : "Abhay",
+      //   status : "unpicked"
+      id: uuidv4(),
+      position: { x: 100, y: 100 },
+      type: "circle",
       data: {
-        label: newNodeInput.name.length > 0 ? newNodeInput.name : "Default Name",
-        description: "Custom user-defined node",
-        color:
-          newNodeInput.color.length > 0 ? newNodeInput.color : "#ffffff",
+        projectId: 1,
+        task: "New task",
+        assignedTo: "Suraj",
+        status: "unpicked",
       },
     };
 
@@ -207,7 +253,7 @@ const Content = () => {
           if (node.id === selectedElements[0]?.id) {
             node.data = {
               ...node.data,
-              label: nodeName,
+              projectId: 1,
             };
             node.style = {
               ...node.style,
@@ -314,6 +360,33 @@ const Content = () => {
     restoreFlow();
   }, [setNodes, setViewport, setEdges]);
 
+  const saveGraph = async () => {
+    const formattedNodes = nodes.map((node) => ({
+      graphNodeId: node.id, // 👈 pass ID from React Flow node
+      projectId: node.data.projectId,
+      task: node.data.task,
+      assignedTo: node.data.assignedTo,
+      assignedAt: new Date().toISOString(), // if needed
+      status: node.data.status,
+      posX: node.position.x,
+      posY: node.position.y,
+    }));
+
+    const formattedEdges = edges.map((edge) => ({
+      graphEdgeId: edge.id, // 👈 use same ID from frontend
+      projectId: 1,
+      source: edge.source,
+      target: edge.target,
+    }));
+
+    await axios.post("http://localhost:2999/save", {
+      nodes: formattedNodes,
+      edges: formattedEdges,
+    });
+
+    alert("Graph saved!");
+  };
+
   return (
     <ReactFlow
       ref={ref}
@@ -363,7 +436,7 @@ const Content = () => {
                 <div className="flex flex-col space-y-3">
                   <input
                     type="text"
-                    placeholder="Name"
+                    placeholder="Task"
                     className="p-[1px] border pl-1 "
                     onChange={(e) =>
                       setNewNodeInput((prev) => ({
@@ -373,7 +446,7 @@ const Content = () => {
                     }
                     value={newNodeInput.name}
                   />
-                  <div className="flex flex-row gap-x-2">
+                  {/* <div className="flex flex-row gap-x-2">
                     <label className="font-semibold ">Color:</label>
                     <input
                       type="color"
@@ -387,7 +460,7 @@ const Content = () => {
                       }
                       value={newNodeInput.color}
                     />
-                  </div>
+                  </div> */}
                   <button
                     className="p-[4px]  text-white bg-slate-700 hover:bg-slate-800 active:bg-slate-900 rounded"
                     onClick={handleCreateNode}
@@ -447,7 +520,7 @@ const Content = () => {
                 <div className="flex flex-row space-x-3">
                   <button
                     className="flex-1 p-2 text-sm text-white transition duration-300 ease-in-out rounded bg-slate-700 hover:bg-slate-800 active:bg-slate-900"
-                    onClick={onSave}
+                    onClick={saveGraph}
                   >
                     Save
                   </button>
@@ -506,4 +579,5 @@ const ReactFlowProviderContent = () => {
     </ReactFlowProvider>
   );
 };
+
 export default ReactFlowProviderContent;
