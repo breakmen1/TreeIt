@@ -24,10 +24,9 @@ export default function ContextMenu({
   right,
   bottom,
   ...props
-}) 
-{
+}) {
 
-  const { getNode, setNodes, addNodes, setEdges, getNodes, getEdges } = useReactFlow();
+  const { getNode, setNodes, addNodes, setEdges, getNodes, getEdges, fitView } = useReactFlow();
   const duplicateNode = useCallback(() => {
     const node = getNode(id);
     const position = {
@@ -43,6 +42,10 @@ export default function ContextMenu({
     const currentEdges = getEdges();
     const layouted = layoutNodesWithDagre(currentNodes, currentEdges, "TB"); // or "LR"
     setNodes(layouted);
+
+    setTimeout(() => {
+      fitView({ padding: 0.3, includeHiddenNodes: true });
+    }, 100); // delay to ensure layout is applied
   };
 
   const deleteNode = useCallback(() => {
