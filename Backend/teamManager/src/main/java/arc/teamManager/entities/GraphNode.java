@@ -19,15 +19,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GraphNode {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "GraphNode_ID")
+    @Column(name = "GRAPHNODE_ID", nullable = false)
     private Long graphNodeId;
 
     @Column(name = "PROJECT_ID")
     private Long projectId;
 
-    @Column(name = "LABEL")
-    private String label;
+    @Column(name = "TASK")
+    private String task;
 
     @Column(name = "ASSIGNED_TO")
     private String assignedTo;
@@ -37,9 +36,6 @@ public class GraphNode {
 
     @Column(name = "STATUS")
     private String status;
-
-    @Column(name = "DESCRIPTION", length = 1000)
-    private String description;
 
     @Column(name = "POS_X")
     private int posX;

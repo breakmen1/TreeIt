@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GraphEdge {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "GraphEdge_ID")
     private Long graphEdgeId;
 
