@@ -20,10 +20,10 @@ import lombok.NoArgsConstructor;
 public class GraphNode {
     @Id
     @Column(name = "GRAPHNODE_ID", nullable = false)
-    private Long graphNodeId;
+    private String graphNodeId;
 
     @Column(name = "PROJECT_ID")
-    private Long projectId;
+    private String projectId;
 
     @Column(name = "TASK")
     private String task;

@@ -20,10 +20,10 @@ import lombok.NoArgsConstructor;
 public class GraphEdge {
     @Id
     @Column(name = "GraphEdge_ID")
-    private Long graphEdgeId;
+    private String graphEdgeId;
 
     @Column(name = "PROJECT_ID")
-    private Long projectId;
+    private String projectId;
 
     @Column(name = "SOURCE")
     private String source;

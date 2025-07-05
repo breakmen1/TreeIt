@@ -77,7 +77,8 @@ const Content = () => {
   const ref = useRef(null);
   const [newNodeInput, setNewNodeInput] = useState({
     id: "",
-    name: "",
+    taskDescription: "",
+    assignedTo: "",
     color: "#ffffff",
   });
   const { setViewport } = useReactFlow();
@@ -94,7 +95,7 @@ const Content = () => {
           position: { x: node.posX, y: node.posY },
           data: {
             projectId: node.projectId,
-            task: node.label,
+            task: node.task,
             assignedTo: node.assignedTo,
             status: node.status,
           },
@@ -210,35 +211,14 @@ const Content = () => {
   );
 
   const handleCreateNode = () => {
-    // const newNode = {
-    //   id: newNodeInput.id.length > 0 ? newNodeInput.id : getId(),
-    //   position: { x: 400, y: 50 }, // You can set the initial position as needed
-    //   data: {
-    //     label:
-    //       newNodeInput.name.length > 0 ? newNodeInput.name : "Default Name",
-    //   },
-    //   style: {
-    //     background:
-    //       newNodeInput.color.length > 0 ? newNodeInput.color : nodeColor, // Default color
-    //   },
-    // };
-
     const newNode = {
-      // id: newNodeInput.id.length > 0 ? newNodeInput.id : getId(),
-      // type: "circle", // ✅ important
-      // position: { x: 400, y: 50 },
-      // data: {
-      //   projectId : 1,
-      //   task: "This updates something important",
-      //   assignedTo : "Abhay",
-      //   status : "unpicked"
       id: uuidv4(),
       position: { x: 100, y: 100 },
       type: "circle",
       data: {
         projectId: 1,
-        task: "New task",
-        assignedTo: "Suraj",
+        task: newNodeInput.taskDescription,
+        assignedTo: newNodeInput.assignedTo,
         status: "unpicked",
       },
     };
@@ -268,31 +248,6 @@ const Content = () => {
       setNodeColor("#ffffff");
     }
   }, [nodeName, nodeColor, selectedElements, setNodes]);
-
-  const handleUpdateNode = (event) => {
-    const { name, value } = event.target;
-
-    // Update the corresponding state based on the input name
-
-    if (name === "name") setNodeName(value);
-    else if (name === "background") setNodeColor(value.background);
-
-    // Find the selected node and update its data
-    setNodes((prevNodes) =>
-      prevNodes.map((n) =>
-        n.id === nodeId
-          ? {
-              ...n,
-              data: { ...n.data, [name]: value },
-              style: {
-                ...n.style,
-                [name]: value,
-              },
-            }
-          : n
-      )
-    );
-  };
 
   const onDragStart = (event, nodeType) => {
     event.dataTransfer.setData("application/reactflow", nodeType);
@@ -338,28 +293,8 @@ const Content = () => {
   );
 
   const flowKey = "example-flow";
-  const onSave = useCallback(() => {
-    if (reactFlowInstance) {
-      const flow = reactFlowInstance.toObject();
-      localStorage.setItem(flowKey, JSON.stringify(flow));
-    }
-  }, [reactFlowInstance]);
 
-  const onRestore = useCallback(() => {
-    const restoreFlow = async () => {
-      const flow = JSON.parse(localStorage.getItem(flowKey));
-
-      if (flow) {
-        const { x = 0, y = 0, zoom = 1 } = flow.viewport;
-        setNodes(flow.nodes || []);
-        setEdges(flow.edges || []);
-        setViewport({ x, y, zoom });
-      }
-    };
-
-    restoreFlow();
-  }, [setNodes, setViewport, setEdges]);
-
+  
   const saveGraph = async () => {
     const formattedNodes = nodes.map((node) => ({
       graphNodeId: node.id, // 👈 pass ID from React Flow node
@@ -408,9 +343,8 @@ const Content = () => {
     >
       {/* sidebar */}
       <div
-        className={`transition-all  duration-500  fixed top-0 ${
-          isSidebarOpen ? "left-0" : "-left-64"
-        }`}
+        className={`transition-all  duration-500  fixed top-0 ${isSidebarOpen ? "left-0" : "-left-64"
+          }`}
       >
         <div className="relative flex flex-col w-64 h-screen min-h-screen px-4 py-8 overflow-y-auto bg-white border-r">
           <div className="">
@@ -422,7 +356,7 @@ const Content = () => {
               <BiSolidDockLeft className="w-5 h-5" />
             </button>
             <h2 className="text-3xl font-semibold text-gray-700 ">
-              Team <span className="-ml-1 text-pink-500 ">Chart</span>
+              Task <span className="-ml-1 text-pink-500 ">It</span>
             </h2>
           </div>
           <hr className="my-0 mt-[0.20rem]" />
@@ -430,90 +364,41 @@ const Content = () => {
             <div className="flex flex-col justify-start space-y-5 h-[calc(100vh-135px)]">
               {/* Create Node Section */}
               <div className="flex flex-col space-y-3 ">
-                <div className="mt-3 text-lg font-bold text-black">
-                  Create Node
-                </div>
                 <div className="flex flex-col space-y-3">
                   <input
                     type="text"
-                    placeholder="Task"
+                    placeholder="Task Description"
                     className="p-[1px] border pl-1 "
                     onChange={(e) =>
                       setNewNodeInput((prev) => ({
                         ...prev,
-                        name: e.target.value,
+                        taskDescription: e.target.value,
                       }))
                     }
-                    value={newNodeInput.name}
+                    value={newNodeInput.taskDescription}
                   />
-                  {/* <div className="flex flex-row gap-x-2">
-                    <label className="font-semibold ">Color:</label>
-                    <input
-                      type="color"
-                      placeholder="Color"
-                      className="p-[1px] border pl-1"
-                      onChange={(e) =>
-                        setNewNodeInput((prev) => ({
-                          ...prev,
-                          color: e.target.value,
-                        }))
-                      }
-                      value={newNodeInput.color}
-                    />
-                  </div> */}
+
+                  <input
+                    type="text"
+                    placeholder="Assigned to"
+                    className="p-[1px] border pl-1 "
+                    onChange={(e) =>
+                      setNewNodeInput((prev) => ({
+                        ...prev,
+                        assignedTo: e.target.value,
+                      }))
+                    }
+                    value={newNodeInput.assignedTo}
+                  />
                   <button
                     className="p-[4px]  text-white bg-slate-700 hover:bg-slate-800 active:bg-slate-900 rounded"
                     onClick={handleCreateNode}
                   >
-                    Create
+                    Create Node
                   </button>
                 </div>
               </div>
               <hr className="my-2" />
-              {/* Update Node Section */}
-              <div className="flex flex-col space-y-3">
-                <div className="text-lg font-bold text-black">Update Node</div>
-                <div className="flex flex-col space-y-3">
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Name"
-                    value={nodeName}
-                    onChange={handleUpdateNode}
-                    className="p-[1px] border pl-1 "
-                  />
-                  <div className="flex flex-row gap-x-5">
-                    <div className="flex flex-row gap-x-2">
-                      <label className="font-semibold ">Color:</label>
-                      <input
-                        type="color"
-                        placeholder="bgColor"
-                        name="background"
-                        value={nodeColor}
-                        onChange={handleUpdateNode}
-                        className="p-[1px] border pl-1"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <hr className="my-0" />
-              {/* Drag and Drop Section */}
-              <div className="flex flex-col space-y-3">
-                <div className="text-lg font-bold text-black">
-                  Drag and Drop
-                </div>
-                <div className="flex flex-col p-1 space-y-3 rounded outline outline-2">
-                  <div
-                    className="font-medium text-center rounded cursor-grab"
-                    onDragStart={(event) => onDragStart(event, "default")}
-                    draggable
-                  >
-                    Default Node
-                  </div>
-                </div>
-              </div>
-              <hr className="my-0" />
               {/* Save and Restore Buttons */}
               <div className="flex flex-col space-y-3">
                 <div className="text-lg font-bold text-black">Controls</div>
@@ -524,20 +409,20 @@ const Content = () => {
                   >
                     Save
                   </button>
-                  <button
-                    className="flex-1 p-2 text-sm text-white rounded bg-slate-700 hover:bg-slate-800 active:bg-slate-900"
-                    onClick={onRestore}
-                  >
-                    Restore{" "}
-                  </button>
+
                   <button
                     className="flex-1 p-2 text-sm text-white rounded bg-slate-700 hover:bg-slate-800 active:bg-slate-900"
                     onClick={onClick}
                   >
                     Download{" "}
                   </button>
+
                 </div>
               </div>
+
+
+
+
               <hr className="my-0" />
               <div className="flex justify-center px-4 pb-2 mt-auto -mx-4 bottom-3">
                 <h4 className=" text-[12px] font-semibold text-gray-600 ">
@@ -570,9 +455,8 @@ const ReactFlowProviderContent = () => {
   return (
     <ReactFlowProvider>
       <div
-        className={`h-[calc(100vh-74px)] flex flex-col  ${
-          isSidebarOpen ? "ml-64" : ""
-        }`}
+        className={`h-[calc(100vh-74px)] flex flex-col  ${isSidebarOpen ? "ml-64" : ""
+          }`}
       >
         <Content />
       </div>

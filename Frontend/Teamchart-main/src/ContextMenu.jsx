@@ -1,21 +1,6 @@
-// import React, { useCallback } from "react";
-// import { useReactFlow } from "reactflow";
-// import { layoutNodesWithDagre } from "./layoutNodesWithDagre";
-
-// export default function ContextMenu({
-//   id,
-//   top,
-//   left,
-//   right,
-//   bottom,
-//   ...props
-// }) 
 import React, { useCallback } from "react";
 import { useReactFlow } from "reactflow";
-import { layoutNodesWithDagre } from "./layoutNodesWithDagre";
-
-
-
+import {layoutNodesWithDagre} from "./layoutNodesWithDagre";
 
 export default function ContextMenu({
   id,
@@ -27,15 +12,6 @@ export default function ContextMenu({
 }) {
 
   const { getNode, setNodes, addNodes, setEdges, getNodes, getEdges, fitView } = useReactFlow();
-  const duplicateNode = useCallback(() => {
-    const node = getNode(id);
-    const position = {
-      x: node.position.x + 50,
-      y: node.position.y + 50,
-    };
-
-    addNodes({ ...node, id: `${node.id}-copy`, position });
-  }, [id, getNode, addNodes]);
 
   const applyAutoLayout = () => {
     const currentNodes = getNodes();
@@ -47,6 +23,7 @@ export default function ContextMenu({
       fitView({ padding: 0.3, includeHiddenNodes: true });
     }, 100); // delay to ensure layout is applied
   };
+
 
   const deleteNode = useCallback(() => {
     setNodes((nodes) => nodes.filter((node) => node.id !== id));
@@ -63,20 +40,17 @@ export default function ContextMenu({
         <small>node: {id}</small>
       </p>
       <button
-        onClick={duplicateNode}
-        className="hover:bg-slate-200 bg-slate-100  block p-[0.5em] text-left w-[100%]"
-      >
-        <small>Duplicate</small>
-      </button>
-      <button
         onClick={deleteNode}
         className="hover:bg-slate-200 bg-slate-100 block p-[0.5em] text-left w-[100%]"
       >
         <small>Delete</small>
       </button>
 
-      <button onClick={applyAutoLayout} className="px-2 py-1 bg-blue-500 text-white rounded">
-        Auto Layout
+      <button
+        onClick={applyAutoLayout}
+        className="hover:bg-slate-200 bg-slate-100 block p-[0.5em] text-left w-[100%]"
+      >
+        <small>Auto layout</small>
       </button>
 
     </div>
