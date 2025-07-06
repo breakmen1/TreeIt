@@ -1,4 +1,4 @@
-// TooltipPortal.jsx
+// NodeProperties.jsx
 import ReactDOM from "react-dom";
 
 const tooltipRoot = document.getElementById("tooltip-root") || (() => {

@@ -1,9 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Handle, Position } from "reactflow";
-import TooltipPortal from "./ToolTipPortal";
+import TooltipPortal from "./NodeProperties";
 import { FaTasks, FaUser } from "react-icons/fa";
-
-
 
 export default function CircleNode({ data }) {
   const nodeRef = useRef(null);
@@ -93,12 +91,18 @@ export default function CircleNode({ data }) {
               <span><strong>Assigned:</strong> {data.assignedTo}</span>
             </div>
             <div className="mt-1">
+              <strong>Deadline:</strong>{" "}
+              {data.deadline ? new Date(data.deadline).toLocaleString() : "None"}
+            </div>
+            <div className="mt-1">
               <label>
                 <strong>Status:</strong>
                 <select
                   className="ml-1 text-black rounded"
                   value={data.status}
-                  onChange={(e) => data.onStatusChange?.(e.target.value)}
+                  onChange={(e) => {
+                    data.onStatusChange?.(e.target.value);
+                  }}
                 >
                   <option value="pending">Pending</option>
                   <option value="completed">Completed</option>

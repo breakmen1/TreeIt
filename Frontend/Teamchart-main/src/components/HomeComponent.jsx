@@ -1,5 +1,5 @@
 import React, { useCallback, useState, useEffect, useRef } from "react";
-import CircleNode from "./CircleNode";
+import CircleNode from "./Node";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import ReactFlow, {
@@ -16,17 +16,18 @@ import ReactFlow, {
   getTransformForBounds,
 } from "reactflow";
 
-import ContextMenu from "./ContextMenu";
+import ContextMenu from "./NodeHandle";
 import { toPng } from "html-to-image";
 import "reactflow/dist/style.css";
 import { BiSolidDockLeft } from "react-icons/bi";
 import { FaHeart } from "react-icons/fa";
-import { useGlobalContext } from "./context";
+import { useGlobalContext } from "./Sidebar";
 import "reactflow/dist/style.css";
 
 const nodeTypes = {
   circle: CircleNode,
 };
+
 const initialNodes = [
   {
     id: "1",
@@ -79,6 +80,7 @@ const Content = () => {
     id: "",
     taskDescription: "",
     assignedTo: "",
+    deadline: "",
     color: "#ffffff",
   });
   const { setViewport } = useReactFlow();
@@ -97,6 +99,7 @@ const Content = () => {
             projectId: node.projectId,
             task: node.task,
             assignedTo: node.assignedTo,
+            deadline: node.deadline,
             status: node.status,
           },
         }));
@@ -116,6 +119,48 @@ const Content = () => {
 
     fetchGraphData();
   }, []);
+
+  const getChildren = (parentId, allEdges) => {
+    return allEdges
+      .filter((edge) => edge.source === parentId)
+      .map((edge) => edge.target);
+  };
+
+  const getParents = (childId, allEdges) => {
+    return allEdges
+      .filter((edge) => edge.target === childId)
+      .map((edge) => edge.source);
+  };
+
+  const updateParentStatus = (changedNodeId) => {
+    const parents = getParents(changedNodeId, edges);
+
+    parents.forEach((parentId) => {
+      const childrenIds = getChildren(parentId, edges);
+      const allChildrenCompleted = childrenIds.every((cid) => {
+        const childNode = nodes.find((n) => n.id === cid);
+        return childNode?.data?.status === "completed";
+      });
+
+      setNodes((prevNodes) =>
+        prevNodes.map((node) => {
+          if (node.id === parentId) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                status: allChildrenCompleted ? "completed" : "pending",
+              },
+            };
+          }
+          return node;
+        })
+      );
+    });
+  };
+
+
+
 
   const enhanceNodesWithStatusHandler = (nodes) => {
     return nodes.map((node) => ({
@@ -244,6 +289,7 @@ const Content = () => {
         projectId: 1,
         task: newNodeInput.taskDescription,
         assignedTo: newNodeInput.assignedTo,
+        deadline: newNodeInput.deadline || new Date().toISOString(), // default now
         status: "unpicked",
         onStatusChange: (newStatus) => {
           setNodes((prevNodes) =>
@@ -337,6 +383,7 @@ const Content = () => {
       task: node.data.task,
       assignedTo: node.data.assignedTo,
       assignedAt: new Date().toISOString(), // if needed
+      deadline: node.data.deadline,
       status: node.data.status,
       posX: node.position.x,
       posY: node.position.y,
@@ -425,6 +472,21 @@ const Content = () => {
                     }
                     value={newNodeInput.assignedTo}
                   />
+
+                  <input
+                    type="datetime-local"
+                    placeholder="Deadline"
+                    className="p-[1px] border pl-1"
+                    value={newNodeInput.deadline}
+                    onChange={(e) =>
+                      setNewNodeInput((prev) => ({
+                        ...prev,
+                        deadline: e.target.value,
+                      }))
+                    }
+                  />
+
+
                   <button
                     className="p-[4px]  text-white bg-slate-700 hover:bg-slate-800 active:bg-slate-900 rounded"
                     onClick={handleCreateNode}
@@ -454,8 +516,6 @@ const Content = () => {
 
                 </div>
               </div>
-
-
 
 
               <hr className="my-0" />

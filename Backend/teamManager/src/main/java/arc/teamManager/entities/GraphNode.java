@@ -34,6 +34,9 @@ public class GraphNode {
     @Column(name = "ASSIGNED_AT")
     private LocalDateTime assignedAt;
 
+    @Column(name = "DEADLINE")
+    private String deadline;
+
     @Column(name = "STATUS")
     private String status;
 

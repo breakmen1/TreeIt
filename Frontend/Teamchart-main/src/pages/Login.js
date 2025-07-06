@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api';
-import './Login.css'; // ✅ Import the CSS file
+import api from '../components/BaseAPI';
+import '../style/Login.css'; // ✅ Import the CSS file
 
 function Login({ onLogin }) {
   const [form, setForm] = useState({ username: '', password: '' });

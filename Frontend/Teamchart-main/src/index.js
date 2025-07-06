@@ -4,7 +4,7 @@ import "./index.css";
 import App from "./App";
 import { createBrowserRouter, RouterProvider, BrowserRouter } from "react-router-dom";
 
-import { AppProvider } from "./context";
+import { AppProvider } from "./components/Sidebar";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -23,6 +23,3 @@ root.render(
     </AppProvider>
   </React.StrictMode>
 );
-
-
-

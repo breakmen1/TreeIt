@@ -1,7 +1,7 @@
 import React from "react";
 import { FaBars } from "react-icons/fa";
-import { useGlobalContext } from "./context";
-import ReactFlowProviderContent from "./ReactFlowProviderContent";
+import { useGlobalContext } from "../components/Sidebar";
+import ReactFlowProviderContent from "../components/HomeComponent";
 const Home = () => {
   const { openSidebar, isSidebarOpen } = useGlobalContext();
 

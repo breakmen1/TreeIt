@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { useReactFlow } from "reactflow";
-import {layoutNodesWithDagre} from "./layoutNodesWithDagre";
+import {layoutNodesWithDagre} from "./DagreLayoutHelper";
 
 export default function ContextMenu({
   id,
