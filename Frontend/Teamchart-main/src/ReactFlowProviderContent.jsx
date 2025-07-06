@@ -107,7 +107,7 @@ const Content = () => {
           target: edge.target.toString(),
         }));
 
-        setNodes(backendNodes);
+        setNodes(enhanceNodesWithStatusHandler(backendNodes));
         setEdges(backendEdges);
       } catch (err) {
         console.error("❌ Failed to fetch graph data", err);
@@ -116,6 +116,31 @@ const Content = () => {
 
     fetchGraphData();
   }, []);
+
+  const enhanceNodesWithStatusHandler = (nodes) => {
+    return nodes.map((node) => ({
+      ...node,
+      data: {
+        ...node.data,
+        onStatusChange: (newStatus) => {
+          setNodes((prevNodes) =>
+            prevNodes.map((n) =>
+              n.id === node.id
+                ? {
+                  ...n,
+                  data: {
+                    ...n.data,
+                    status: newStatus,
+                  },
+                }
+                : n
+            )
+          );
+        },
+      },
+    }));
+  };
+
 
   const onClick = () => {
     // we calculate a transform for the nodes so that all nodes are visible
@@ -183,9 +208,9 @@ const Content = () => {
   // Handle node click
   const onNodeClick = useCallback((event, node) => {
     setSelectedElements([node]);
-    setNodeName(node.data.label);
+    setNodeName(node.data.task);
     setNodeId(node.id);
-    setNodeColor(node.style.background);
+    setNodeColor("transparent");
   }, []);
   const onEdgeUpdateStart = useCallback(() => {
     edgeUpdateSuccessful.current = false;
@@ -220,8 +245,18 @@ const Content = () => {
         task: newNodeInput.taskDescription,
         assignedTo: newNodeInput.assignedTo,
         status: "unpicked",
+        onStatusChange: (newStatus) => {
+          setNodes((prevNodes) =>
+            prevNodes.map((n) =>
+              n.id === newNode.id
+                ? { ...n, data: { ...n.data, status: newStatus } }
+                : n
+            )
+          );
+        },
       },
     };
+
 
     setNodes((prevNodes) => [...prevNodes, newNode]);
     setNewNodeInput({ id: "", name: "", color: "#ffffff" });
@@ -294,7 +329,7 @@ const Content = () => {
 
   const flowKey = "example-flow";
 
-  
+
   const saveGraph = async () => {
     const formattedNodes = nodes.map((node) => ({
       graphNodeId: node.id, // 👈 pass ID from React Flow node

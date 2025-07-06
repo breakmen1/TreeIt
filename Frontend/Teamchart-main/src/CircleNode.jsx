@@ -1,19 +1,45 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Handle, Position } from "reactflow";
-import TooltipPortal from "./ToolTipPortal"; // 👈
+import TooltipPortal from "./ToolTipPortal";
 import { FaTasks, FaUser } from "react-icons/fa";
+
 
 
 export default function CircleNode({ data }) {
   const nodeRef = useRef(null);
   const [hoverPos, setHoverPos] = useState(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const timeoutRef = useRef(null);
+
+  const handleMouseEnter = () => {
+    clearTimeout(timeoutRef.current); // prevent early hide
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 500); // ⏱ keep tooltip for 3 seconds
+  };
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "pending":
+        return "#60a5fa"; // blue
+      case "completed":
+        return "#34d399"; // green
+      case "stuck":
+        return "#f87171"; // red
+      default:
+        return "#e5e7eb"; // gray
+    }
+  };
 
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (nodeRef.current && nodeRef.current.contains(e.target)) {
         const rect = nodeRef.current.getBoundingClientRect();
         setHoverPos({
-          top: rect.top - 60,
+          top: rect.top - 80,
           left: rect.left + rect.width / 2,
         });
       } else {
@@ -25,20 +51,38 @@ export default function CircleNode({ data }) {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
+  const handleStatusChange = (e) => {
+    if (data.onStatusChange) {
+      data.onStatusChange(e.target.value);
+    }
+  };
+
   return (
     <div
-      ref={nodeRef}
-      className="flex items-center justify-center w-[60px] h-[60px] rounded-full"
-      style={{
-        backgroundColor: "#e5e7eb",
-        border: "2px solid #9ca3af",
-      }}
+      className="relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
-      <Handle type="target" position={Position.Top} />
-      <Handle type="source" position={Position.Bottom} />
+      <div
+        ref={nodeRef}
+        className="flex items-center justify-center w-[60px] h-[60px] rounded-full"
+        style={{
+          backgroundColor: data.status === "completed"
+            ? "#4ade80" // green
+            : data.status === "pending"
+              ? "#60a5fa" // blue
+              : data.status === "stuck"
+                ? "#f87171" // red
+                : "#e5e7eb",
+          border: "2px solid #9ca3af",
+        }}
+      >
+        <Handle type="target" position={Position.Left} />
+        <Handle type="source" position={Position.Right} />
+      </div>
 
-      {hoverPos && (
-        <TooltipPortal style={{ top: hoverPos.top, left: hoverPos.left, transform: "translateX(-50%)" }}>
+      {isHovered && (
+        <div className="absolute top-[-80px] left-1/2 transform -translate-x-1/2 z-50">
           <div className="px-3 py-2 bg-black text-white text-xs rounded-md shadow-md whitespace-nowrap">
             <div className="flex items-start gap-2 mb-1">
               <FaTasks className="mt-[2px] text-yellow-400" />
@@ -49,10 +93,21 @@ export default function CircleNode({ data }) {
               <span><strong>Assigned:</strong> {data.assignedTo}</span>
             </div>
             <div className="mt-1">
-              <strong>Status:</strong> {data.status}
+              <label>
+                <strong>Status:</strong>
+                <select
+                  className="ml-1 text-black rounded"
+                  value={data.status}
+                  onChange={(e) => data.onStatusChange?.(e.target.value)}
+                >
+                  <option value="pending">Pending</option>
+                  <option value="completed">Completed</option>
+                  <option value="stuck">Stuck</option>
+                </select>
+              </label>
             </div>
           </div>
-        </TooltipPortal>
+        </div>
       )}
     </div>
   );

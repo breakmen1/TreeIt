@@ -16,7 +16,7 @@ export default function ContextMenu({
   const applyAutoLayout = () => {
     const currentNodes = getNodes();
     const currentEdges = getEdges();
-    const layouted = layoutNodesWithDagre(currentNodes, currentEdges, "TB"); // or "LR"
+    const layouted = layoutNodesWithDagre(currentNodes, currentEdges, "LR"); // or "LR"
     setNodes(layouted);
 
     setTimeout(() => {
