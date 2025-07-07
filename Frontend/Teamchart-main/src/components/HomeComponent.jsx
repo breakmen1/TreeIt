@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useRef } from "react";
+import React, { useCallback, useState, useEffect, useRef, useMemo } from "react";
 import CircleNode from "./Node";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
@@ -64,7 +64,7 @@ function downloadImage(dataUrl) {
 }
 const imageWidth = 1024;
 const imageHeight = 768;
-const Content = () => {
+const Content = ({ selectedProjectId  }) => {
   const { isSidebarOpen, closeSidebar } = useGlobalContext();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -85,12 +85,18 @@ const Content = () => {
   });
   const { setViewport } = useReactFlow();
   const { getNodes } = useReactFlow();
+  const filteredNodes = useMemo(() => {
+    return nodes.filter(node => node.data.projectId === selectedProjectId );
+  }, [nodes, selectedProjectId ]);
 
+  
   useEffect(() => {
     const fetchGraphData = async () => {
-      try {
-        const res = await axios.get("http://localhost:2999/load");
+      if (!selectedProjectId) return;
 
+      try {
+        console.log("calling backend");
+        const res = await axios.get(`http://localhost:2999/load/${selectedProjectId}`);
         const backendNodes = res.data.nodes.map((node) => ({
           id: node.graphNodeId.toString(),
           type: "circle",
@@ -103,22 +109,24 @@ const Content = () => {
             status: node.status,
           },
         }));
-
+        
         const backendEdges = res.data.edges.map((edge) => ({
           id: edge.graphEdgeId?.toString() || `e${edge.source}-${edge.target}`,
           source: edge.source.toString(),
           target: edge.target.toString(),
         }));
-
+        console.log(backendNodes);
         setNodes(enhanceNodesWithStatusHandler(backendNodes));
         setEdges(backendEdges);
+        
       } catch (err) {
         console.error("❌ Failed to fetch graph data", err);
       }
     };
 
     fetchGraphData();
-  }, []);
+  }, [selectedProjectId]); // 👈 refetch when selected project changes
+
 
   const getChildren = (parentId, allEdges) => {
     return allEdges
@@ -286,7 +294,7 @@ const Content = () => {
       position: { x: 100, y: 100 },
       type: "circle",
       data: {
-        projectId: 1,
+        projectId: selectedProjectId,
         task: newNodeInput.taskDescription,
         assignedTo: newNodeInput.assignedTo,
         deadline: newNodeInput.deadline || new Date().toISOString(), // default now
@@ -407,7 +415,7 @@ const Content = () => {
   return (
     <ReactFlow
       ref={ref}
-      nodes={nodes}
+      nodes={filteredNodes}
       edges={edges}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
@@ -425,15 +433,14 @@ const Content = () => {
     >
       {/* sidebar */}
       <div
-        className={`transition-all  duration-500  fixed top-0 ${isSidebarOpen ? "left-0" : "-left-64"
+        className={`transition-all  duration-500  fixed top-0 ${isSidebarOpen ? "right-0" : "-right-64"
           }`}
       >
         <div className="relative flex flex-col w-64 h-screen min-h-screen px-4 py-8 overflow-y-auto bg-white border-r">
           <div className="">
             <button
               onClick={closeSidebar}
-              className="absolute flex items-center justify-center w-8 h-8 ml-6 text-gray-600 rounded-full top-1 right-1 active:bg-gray-300 focus:outline-none hover:bg-gray-200 hover:text-gray-800"
-            >
+              className="absolute flex items-center justify-center w-8 h-8 ml-6 text-gray-600 rounded-full top-1 right-1">
               {/* <HiX className="w-5 h-5" /> */}
               <BiSolidDockLeft className="w-5 h-5" />
             </button>
@@ -545,18 +552,19 @@ const Content = () => {
   );
 };
 
-const ReactFlowProviderContent = () => {
+const ReactFlowProviderContent = ({ selectedProjectId }) => {
   const { isSidebarOpen } = useGlobalContext();
+
   return (
     <ReactFlowProvider>
       <div
-        className={`h-[calc(100vh-74px)] flex flex-col  ${isSidebarOpen ? "ml-64" : ""
-          }`}
+        className={`h-[calc(100vh-74px)] flex flex-col  ${isSidebarOpen ? "mr-64" : ""}`}
       >
-        <Content />
+        <Content selectedProjectId={selectedProjectId} />
       </div>
     </ReactFlowProvider>
   );
 };
+
 
 export default ReactFlowProviderContent;
