@@ -18,7 +18,7 @@ const LeftSidebar = ({ projects = [], onAddProject, onSelectProject }) => {
         {projects.map((project, index) => (
           <button
             key={index}
-            onClick={() => onSelectProject(project.id)}
+            onClick={() => onSelectProject(project.projectId)}
             className="text-left px-3 py-2 rounded hover:bg-gray-200 bg-white shadow"
           >
             {project.name}

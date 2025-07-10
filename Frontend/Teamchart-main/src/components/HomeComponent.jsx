@@ -28,30 +28,7 @@ const nodeTypes = {
   circle: CircleNode,
 };
 
-const initialNodes = [
-  {
-    id: "1",
-    type: "circle",
-    position: { x: 500, y: 200 },
-    data: {
-      projectId: 1,
-      task: "This updates something important",
-      assignedTo: "Akash",
-      status: "unpicked",
-    },
-  },
-  {
-    id: "2",
-    type: "circle",
-    position: { x: 500, y: 200 },
-    data: {
-      projectId: 1,
-      task: "This updates something important",
-      assignedTo: "Abhay",
-      status: "unpicked",
-    },
-  },
-];
+const initialNodes = [];
 
 const initialEdges = [{ id: "e1-2", source: "1", target: "2" }];
 
@@ -64,7 +41,8 @@ function downloadImage(dataUrl) {
 }
 const imageWidth = 1024;
 const imageHeight = 768;
-const Content = ({ selectedProjectId  }) => {
+
+const Content = ({ selectedProjectId }) => {
   const { isSidebarOpen, closeSidebar } = useGlobalContext();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -83,92 +61,11 @@ const Content = ({ selectedProjectId  }) => {
     deadline: "",
     color: "#ffffff",
   });
-  const { setViewport } = useReactFlow();
   const { getNodes } = useReactFlow();
+
   const filteredNodes = useMemo(() => {
-    return nodes.filter(node => node.data.projectId === selectedProjectId );
-  }, [nodes, selectedProjectId ]);
-
-  
-  useEffect(() => {
-    const fetchGraphData = async () => {
-      if (!selectedProjectId) return;
-
-      try {
-        console.log("calling backend");
-        const res = await axios.get(`http://localhost:2999/load/${selectedProjectId}`);
-        const backendNodes = res.data.nodes.map((node) => ({
-          id: node.graphNodeId.toString(),
-          type: "circle",
-          position: { x: node.posX, y: node.posY },
-          data: {
-            projectId: node.projectId,
-            task: node.task,
-            assignedTo: node.assignedTo,
-            deadline: node.deadline,
-            status: node.status,
-          },
-        }));
-        
-        const backendEdges = res.data.edges.map((edge) => ({
-          id: edge.graphEdgeId?.toString() || `e${edge.source}-${edge.target}`,
-          source: edge.source.toString(),
-          target: edge.target.toString(),
-        }));
-        console.log(backendNodes);
-        setNodes(enhanceNodesWithStatusHandler(backendNodes));
-        setEdges(backendEdges);
-        
-      } catch (err) {
-        console.error("❌ Failed to fetch graph data", err);
-      }
-    };
-
-    fetchGraphData();
-  }, [selectedProjectId]); // 👈 refetch when selected project changes
-
-
-  const getChildren = (parentId, allEdges) => {
-    return allEdges
-      .filter((edge) => edge.source === parentId)
-      .map((edge) => edge.target);
-  };
-
-  const getParents = (childId, allEdges) => {
-    return allEdges
-      .filter((edge) => edge.target === childId)
-      .map((edge) => edge.source);
-  };
-
-  const updateParentStatus = (changedNodeId) => {
-    const parents = getParents(changedNodeId, edges);
-
-    parents.forEach((parentId) => {
-      const childrenIds = getChildren(parentId, edges);
-      const allChildrenCompleted = childrenIds.every((cid) => {
-        const childNode = nodes.find((n) => n.id === cid);
-        return childNode?.data?.status === "completed";
-      });
-
-      setNodes((prevNodes) =>
-        prevNodes.map((node) => {
-          if (node.id === parentId) {
-            return {
-              ...node,
-              data: {
-                ...node.data,
-                status: allChildrenCompleted ? "completed" : "pending",
-              },
-            };
-          }
-          return node;
-        })
-      );
-    });
-  };
-
-
-
+    return nodes.filter(node => `${node.data.projectId}` == `${selectedProjectId}`);
+  }, [nodes, selectedProjectId]);
 
   const enhanceNodesWithStatusHandler = (nodes) => {
     return nodes.map((node) => ({
@@ -315,33 +212,45 @@ const Content = ({ selectedProjectId  }) => {
     setNodes((prevNodes) => [...prevNodes, newNode]);
     setNewNodeInput({ id: "", name: "", color: "#ffffff" });
   };
-  useEffect(() => {
-    if (selectedElements.length > 0) {
-      setNodes((nds) =>
-        nds.map((node) => {
-          if (node.id === selectedElements[0]?.id) {
-            node.data = {
-              ...node.data,
-              projectId: 1,
-            };
-            node.style = {
-              ...node.style,
-              background: nodeColor,
-            };
-          }
-          return node;
-        })
-      );
-    } else {
-      setNodeName(""); // Clear nodeName when no node is selected
-      setNodeColor("#ffffff");
-    }
-  }, [nodeName, nodeColor, selectedElements, setNodes]);
 
-  const onDragStart = (event, nodeType) => {
-    event.dataTransfer.setData("application/reactflow", nodeType);
-    event.dataTransfer.effectAllowed = "move";
-  };
+  useEffect(() => {
+    const fetchGraphData = async () => {
+      if (!selectedProjectId) return;
+
+      try {
+        console.log("calling backend");
+        const res = await axios.get(`http://localhost:2999/load/${selectedProjectId}`);
+
+        const backendNodes = res.data.nodes.map((node) => ({
+          id: node.graphNodeId.toString(),
+          position: { x: node.posX, y: node.posY },
+          type: "circle",
+          data: {
+            projectId: node.projectId,
+            task: node.task,
+            assignedTo: node.assignedTo,
+            deadline: node.deadline,
+            status: node.status,
+          },
+        }));
+
+        const backendEdges = res.data.edges.map((edge) => ({
+          id: edge.graphEdgeId?.toString() || `e${edge.source}-${edge.target}`,
+          source: edge.source.toString(),
+          target: edge.target.toString(),
+        }));
+
+        console.log('nodes from backend' + backendNodes);
+        setNodes(enhanceNodesWithStatusHandler(backendNodes));
+        setEdges(backendEdges);
+
+      } catch (err) {
+        console.error("❌ Failed to fetch graph data", err);
+      }
+    };
+
+    fetchGraphData();
+  }, [selectedProjectId]); // 👈 refetch when selected project changes
 
   const onDragOver = useCallback((event) => {
     event.preventDefault();
@@ -380,9 +289,6 @@ const Content = ({ selectedProjectId  }) => {
     },
     [reactFlowInstance, getId, setNodes]
   );
-
-  const flowKey = "example-flow";
-
 
   const saveGraph = async () => {
     const formattedNodes = nodes.map((node) => ({

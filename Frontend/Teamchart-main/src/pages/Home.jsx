@@ -1,33 +1,54 @@
-import React, { useState } from "react";
-import LeftSidebar from "../components/LeftSide"; // make sure the path is correct
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import LeftSidebar from "../components/LeftSide";
 import { FaBars } from "react-icons/fa";
 import { useGlobalContext } from "../components/Sidebar";
 import ReactFlowProviderContent from "../components/HomeComponent";
+import { v4 as uuidv4 } from "uuid";
 
 const Home = () => {
   const { openSidebar, isSidebarOpen } = useGlobalContext();
-
-  // ✅ Add this state to track project list
   const [projects, setProjects] = useState([]);
-
-  // ✅ Function to add new project
-  const handleAddProject = (projectName) => {
-    const newProject = {
-      id: Date.now(), // you can replace this with a backend ID if needed
-      name: projectName,
-    };
-    setProjects((prev) => [...prev, newProject]);
-  };
-
   const [selectedProjectId, setSelectedProjectId] = useState(null);
 
+  // ✅ Fetch projects from backend on mount
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await axios.get("http://localhost:2999/projects");
+        setProjects(response.data);
+        
+        
+      } catch (err) {
+        console.error("Failed to fetch projects:", err);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  // ✅ Add new project to backend
+  const handleAddProject = async (name, projectId) => {
+    try {
+      const response = await axios.post("http://localhost:2999/projects", {
+        name: name,
+        projectId: projectId
+      });
+
+      setProjects((prev) => [...prev, response.data]);
+      console.log(response.data);
+    } catch (err) {
+      console.error("Failed to create project:", err);
+    }
+  };
+
   const handleSelectProject = (projectId) => {
-    setSelectedProjectId(projectId); // ✅ Set selected project ID
+    setSelectedProjectId(projectId);
   };
 
   return (
     <div>
-      {/* Add Left Sidebar */}
+      {/* Sidebar */}
       <LeftSidebar
         projects={projects}
         onAddProject={handleAddProject}
@@ -39,8 +60,9 @@ const Home = () => {
         <div>
           <button
             onClick={openSidebar}
-            className={`${isSidebarOpen ? "-translate-x-8" : "translate-x-0"
-              } fixed mt-3 top-2 transition transform ease-linear duration-500 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center active:bg-gray-300 focus:outline-none hover:bg-gray-200 hover:text-gray-800`}
+            className={`${
+              isSidebarOpen ? "translate-x-8" : "translate-x-0"
+            } fixed top-4 right-4 transition transform ease-linear duration-500 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center active:bg-gray-300 focus:outline-none hover:bg-gray-200 hover:text-gray-800`}
           >
             <FaBars className="w-5 h-5" />
           </button>
@@ -52,7 +74,7 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Flow */}
       <div className="ml-64">
         <ReactFlowProviderContent selectedProjectId={selectedProjectId} />
       </div>

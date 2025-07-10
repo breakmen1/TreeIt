@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Handle, Position } from "reactflow";
-import TooltipPortal from "./NodeProperties";
 import { FaTasks, FaUser } from "react-icons/fa";
 
 export default function CircleNode({ data }) {
@@ -19,18 +18,6 @@ export default function CircleNode({ data }) {
       setIsHovered(false);
     }, 500); // ⏱ keep tooltip for 3 seconds
   };
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "pending":
-        return "#60a5fa"; // blue
-      case "completed":
-        return "#34d399"; // green
-      case "stuck":
-        return "#f87171"; // red
-      default:
-        return "#e5e7eb"; // gray
-    }
-  };
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -48,12 +35,6 @@ export default function CircleNode({ data }) {
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
-
-  const handleStatusChange = (e) => {
-    if (data.onStatusChange) {
-      data.onStatusChange(e.target.value);
-    }
-  };
 
   return (
     <div

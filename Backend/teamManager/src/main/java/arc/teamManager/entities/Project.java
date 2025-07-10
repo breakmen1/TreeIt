@@ -13,12 +13,10 @@ import lombok.NoArgsConstructor;
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "MEMBER_ID")
-    private Long memberId;
+    @Column(name = "PROJECT_ID")
+    private Long projectId;
 
     @Column(name = "NAME")
     private String name;
 
-    @Column(name = "ROLE")
-    private String role;
 }
