@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import arc.teamManager.entities.Member;
 import arc.teamManager.models.LoginRequest;
+import arc.teamManager.repositories.MemberRepository;
 import arc.teamManager.services.MemberService;
 
 @RestController
@@ -22,15 +23,20 @@ public class AuthController {
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private MemberRepository memberRepository;
+
+
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest request) {
+    public Long login(@RequestBody LoginRequest request) {
         try {
             Authentication authentication = authManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
             // Normally, you'd return a JWT here. For now:
-            return "Login successful for user: " + authentication.getName();
+            Member member = memberRepository.findByUsername(request.getUsername()).get();
+            return member.getMemberId();
         } catch (AuthenticationException e) {
-            return "Login failed: " + e.getMessage();
+            return null;
         }
     }
 

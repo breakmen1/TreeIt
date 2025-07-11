@@ -19,4 +19,8 @@ public class Project {
     @Column(name = "NAME")
     private String name;
 
+    @ManyToOne
+    @JoinColumn(name = "MEMBER_ID")
+    private Member member;
+
 }
