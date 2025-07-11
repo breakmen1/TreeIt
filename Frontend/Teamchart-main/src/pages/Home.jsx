@@ -13,26 +13,29 @@ const Home = () => {
 
   // ✅ Fetch projects from backend on mount
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await axios.get("http://localhost:2999/projects");
-        setProjects(response.data);
-        
-        
-      } catch (err) {
-        console.error("Failed to fetch projects:", err);
-      }
-    };
+  const fetchProjects = async () => {
+    const memberId = localStorage.getItem("memberId");
+    if (!memberId) return;
 
-    fetchProjects();
-  }, []);
+    try {
+      const res = await axios.get(`http://localhost:2999/projects/member/${memberId}`);
+      setProjects(res.data);
+    } catch (err) {
+      console.error("Error fetching user projects", err);
+    }
+  };
+
+  fetchProjects();
+}, []);
 
   // ✅ Add new project to backend
   const handleAddProject = async (name, projectId) => {
     try {
+      const memberId = localStorage.getItem("memberId");
       const response = await axios.post("http://localhost:2999/projects", {
         name: name,
-        projectId: projectId
+        projectId: projectId,
+        memberId: memberId
       });
 
       setProjects((prev) => [...prev, response.data]);
@@ -53,6 +56,7 @@ const Home = () => {
         projects={projects}
         onAddProject={handleAddProject}
         onSelectProject={handleSelectProject}
+        selectedProjectId={selectedProjectId}
       />
 
       {/* NavBar */}

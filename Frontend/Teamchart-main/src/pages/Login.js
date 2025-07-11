@@ -12,6 +12,8 @@ function Login({ onLogin }) {
     e.preventDefault();
     try {
       const res = await api.post('/auth/login', form);
+      localStorage.setItem("memberId", res.data);
+      console.log("logged memberId:-" + res.data);
       onLogin(res.data);
       navigate('/home');
     } catch (err) {

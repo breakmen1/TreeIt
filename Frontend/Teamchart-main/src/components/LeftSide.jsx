@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 
-const LeftSidebar = ({ projects = [], onAddProject, onSelectProject }) => {
+const LeftSidebar = ({
+  projects = [],
+  onAddProject,
+  onSelectProject,
+  selectedProjectId,
+}) => {
   const [newProjectName, setNewProjectName] = useState("");
 
   const handleAddProject = () => {
@@ -10,20 +15,24 @@ const LeftSidebar = ({ projects = [], onAddProject, onSelectProject }) => {
     }
   };
 
-  return (
+ return (
     <div className="w-64 h-screen bg-gray-100 border-r px-4 py-6 fixed top-0 left-0">
       <h2 className="text-xl font-semibold mb-4">Projects</h2>
 
       <div className="flex flex-col gap-2 mb-4">
-        {projects.map((project, index) => (
-          <button
-            key={index}
-            onClick={() => onSelectProject(project.projectId)}
-            className="text-left px-3 py-2 rounded hover:bg-gray-200 bg-white shadow"
-          >
-            {project.name}
-          </button>
-        ))}
+        {projects.map((project, index) => {
+          const isSelected = project.projectId === selectedProjectId;
+          return (
+            <button
+              key={index}
+              onClick={() => onSelectProject(project.projectId)}
+              className={`text-left px-3 py-2 rounded shadow transition 
+                ${isSelected ? "bg-blue-500 text-white" : "bg-white hover:bg-gray-200 text-black"}`}
+            >
+              {project.name}
+            </button>
+          );
+        })}
       </div>
 
       <div className="flex flex-col">
@@ -42,7 +51,7 @@ const LeftSidebar = ({ projects = [], onAddProject, onSelectProject }) => {
         </button>
       </div>
     </div>
-  );
+  );
 };
 
 export default LeftSidebar;
