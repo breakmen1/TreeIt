@@ -26,7 +26,6 @@ public class AuthController {
     @Autowired
     private MemberRepository memberRepository;
 
-
     @PostMapping("/login")
     public Long login(@RequestBody LoginRequest request) {
         try {
