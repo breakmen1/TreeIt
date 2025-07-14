@@ -11,5 +11,6 @@ import arc.teamManager.entities.Project;
 public interface ProjectRepository extends JpaRepository<Project, Long> {
 
     List<Project> findByMemberMemberId(Long memberId);
+    List<Project> findByMembers_MemberId(Long memberId);
 
 }

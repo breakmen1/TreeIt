@@ -1,4 +1,10 @@
-import React, { useCallback, useState, useEffect, useRef, useMemo } from "react";
+import React, {
+  useCallback,
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+} from "react";
 import CircleNode from "./Node";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
@@ -54,6 +60,8 @@ const Content = ({ selectedProjectId }) => {
   const edgeUpdateSuccessful = useRef(true);
   const [menu, setMenu] = useState(null);
   const ref = useRef(null);
+  const [projectMembers, setProjectMembers] = useState([]);
+
   const [newNodeInput, setNewNodeInput] = useState({
     id: "",
     taskDescription: "",
@@ -62,9 +70,26 @@ const Content = ({ selectedProjectId }) => {
     color: "#ffffff",
   });
   const { getNodes } = useReactFlow();
+  useEffect(() => {
+    const fetchProjectMembers = async () => {
+      if (!selectedProjectId) return;
 
+      try {
+        const res = await axios.get(
+          `http://localhost:2999/projects/${selectedProjectId}/members`
+        );
+        setProjectMembers(res.data);
+      } catch (err) {
+        console.error("Failed to fetch project members:", err);
+      }
+    };
+
+    fetchProjectMembers();
+  }, [selectedProjectId]);
   const filteredNodes = useMemo(() => {
-    return nodes.filter(node => `${node.data.projectId}` == `${selectedProjectId}`);
+    return nodes.filter(
+      (node) => `${node.data.projectId}` == `${selectedProjectId}`
+    );
   }, [nodes, selectedProjectId]);
 
   const enhanceNodesWithStatusHandler = (nodes) => {
@@ -77,12 +102,12 @@ const Content = ({ selectedProjectId }) => {
             prevNodes.map((n) =>
               n.id === node.id
                 ? {
-                  ...n,
-                  data: {
-                    ...n.data,
-                    status: newStatus,
-                  },
-                }
+                    ...n,
+                    data: {
+                      ...n.data,
+                      status: newStatus,
+                    },
+                  }
                 : n
             )
           );
@@ -90,7 +115,6 @@ const Content = ({ selectedProjectId }) => {
       },
     }));
   };
-
 
   const onClick = () => {
     // we calculate a transform for the nodes so that all nodes are visible
@@ -208,7 +232,6 @@ const Content = ({ selectedProjectId }) => {
       },
     };
 
-
     setNodes((prevNodes) => [...prevNodes, newNode]);
     setNewNodeInput({ id: "", name: "", color: "#ffffff" });
   };
@@ -219,7 +242,9 @@ const Content = ({ selectedProjectId }) => {
 
       try {
         console.log("calling backend");
-        const res = await axios.get(`http://localhost:2999/load/${selectedProjectId}`);
+        const res = await axios.get(
+          `http://localhost:2999/load/${selectedProjectId}`
+        );
 
         const backendNodes = res.data.nodes.map((node) => ({
           id: node.graphNodeId.toString(),
@@ -240,10 +265,9 @@ const Content = ({ selectedProjectId }) => {
           target: edge.target.toString(),
         }));
 
-        console.log('nodes from backend' + backendNodes);
+        console.log("nodes from backend" + backendNodes);
         setNodes(enhanceNodesWithStatusHandler(backendNodes));
         setEdges(backendEdges);
-
       } catch (err) {
         console.error("❌ Failed to fetch graph data", err);
       }
@@ -305,7 +329,7 @@ const Content = ({ selectedProjectId }) => {
 
     const formattedEdges = edges.map((edge) => ({
       graphEdgeId: edge.id, // 👈 use same ID from frontend
-      projectId: 1,
+      projectId: selectedProjectId,
       source: edge.source,
       target: edge.target,
     }));
@@ -339,14 +363,16 @@ const Content = ({ selectedProjectId }) => {
     >
       {/* sidebar */}
       <div
-        className={`transition-all  duration-500  fixed top-0 ${isSidebarOpen ? "right-0" : "-right-64"
-          }`}
+        className={`transition-all  duration-500  fixed top-0 ${
+          isSidebarOpen ? "right-0" : "-right-64"
+        }`}
       >
         <div className="relative flex flex-col w-64 h-screen min-h-screen px-4 py-8 overflow-y-auto bg-white border-r">
           <div className="">
             <button
               onClick={closeSidebar}
-              className="absolute flex items-center justify-center w-8 h-8 ml-6 text-gray-600 rounded-full top-1 right-1">
+              className="absolute flex items-center justify-center w-8 h-8 ml-6 text-gray-600 rounded-full top-1 right-1"
+            >
               {/* <HiX className="w-5 h-5" /> */}
               <BiSolidDockLeft className="w-5 h-5" />
             </button>
@@ -373,7 +399,7 @@ const Content = ({ selectedProjectId }) => {
                     value={newNodeInput.taskDescription}
                   />
 
-                  <input
+                  {/* <input
                     type="text"
                     placeholder="Assigned to"
                     className="p-[1px] border pl-1 "
@@ -383,8 +409,27 @@ const Content = ({ selectedProjectId }) => {
                         assignedTo: e.target.value,
                       }))
                     }
+
+                    
                     value={newNodeInput.assignedTo}
-                  />
+                  /> */}
+                  <select
+                    className="p-[1px] border pl-1"
+                    value={newNodeInput.assignedTo}
+                    onChange={(e) =>
+                      setNewNodeInput((prev) => ({
+                        ...prev,
+                        assignedTo: e.target.value,
+                      }))
+                    }
+                  >
+                    <option value="">Select member</option>
+                    {projectMembers.map((member) => (
+                      <option key={member.memberId} value={member.username}>
+                        {member.username}
+                      </option>
+                    ))}
+                  </select>
 
                   <input
                     type="datetime-local"
@@ -398,7 +443,6 @@ const Content = ({ selectedProjectId }) => {
                       }))
                     }
                   />
-
 
                   <button
                     className="p-[4px]  text-white bg-slate-700 hover:bg-slate-800 active:bg-slate-900 rounded"
@@ -426,10 +470,8 @@ const Content = ({ selectedProjectId }) => {
                   >
                     Download{" "}
                   </button>
-
                 </div>
               </div>
-
 
               <hr className="my-0" />
               <div className="flex justify-center px-4 pb-2 mt-auto -mx-4 bottom-3">
@@ -464,13 +506,14 @@ const ReactFlowProviderContent = ({ selectedProjectId }) => {
   return (
     <ReactFlowProvider>
       <div
-        className={`h-[calc(100vh-74px)] flex flex-col  ${isSidebarOpen ? "mr-64" : ""}`}
+        className={`h-[calc(100vh-74px)] flex flex-col  ${
+          isSidebarOpen ? "mr-64" : ""
+        }`}
       >
         <Content selectedProjectId={selectedProjectId} />
       </div>
     </ReactFlowProvider>
   );
 };
-
 
 export default ReactFlowProviderContent;
