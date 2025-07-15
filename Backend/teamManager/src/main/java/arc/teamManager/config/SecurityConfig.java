@@ -17,7 +17,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable();
         http.authorizeHttpRequests(auth -> auth
-                .requestMatchers("/**", "/h2-console/**").permitAll()
+                .requestMatchers("/**", "/postgresql/**").permitAll()
                 .anyRequest().authenticated());
         http.headers(headers -> headers
                 .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));

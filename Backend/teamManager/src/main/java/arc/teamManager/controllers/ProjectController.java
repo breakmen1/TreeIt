@@ -46,7 +46,7 @@ public class ProjectController {
 
     @GetMapping("/member/{memberId}")
     public List<Project> getProjectsByMemberId(@PathVariable Long memberId) {
-        return projectRepository.findByMembers_MemberId(memberId);
+        return projectService.getProjectsByMemberId(memberId);
     }
 
     @PostMapping
