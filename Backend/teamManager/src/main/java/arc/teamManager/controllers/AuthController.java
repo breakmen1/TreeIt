@@ -1,6 +1,7 @@
 package arc.teamManager.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,6 +16,7 @@ import arc.teamManager.services.MemberService;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
     @Autowired
@@ -27,15 +29,21 @@ public class AuthController {
     private MemberRepository memberRepository;
 
     @PostMapping("/login")
-    public Long login(@RequestBody LoginRequest request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
             Authentication authentication = authManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
-            // Normally, you'd return a JWT here. For now:
-            Member member = memberRepository.findByUsername(request.getUsername()).get();
-            return member.getMemberId();
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
+
+            Member member = memberRepository.findByUsername(request.getUsername()).orElse(null);
+
+            if (member == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            }
+
+            return ResponseEntity.ok(member.getMemberId()); // Return memberId or a token
         } catch (AuthenticationException e) {
-            return null;
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
     }
 

@@ -1,23 +1,33 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../components/BaseAPI';
-import '../style/Login.css'; // ✅ Import the CSS file
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../components/BaseAPI";
+import "../style/Login.css"; // ✅ Import the CSS file
 
 function Login({ onLogin }) {
-  const [form, setForm] = useState({ username: '', password: '' });
-  const [error, setError] = useState('');
+  const [form, setForm] = useState({ username: "", password: "" });
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await api.post('/auth/login', form);
-      localStorage.setItem("memberId", res.data);
-      console.log("logged memberId:-" + res.data);
-      onLogin(res.data);
-      navigate('/home');
+      console.log(form);
+      const res = await api.post("/auth/login", form);
+      console.log(res);
+      if (res.status === 200 && typeof res.data === "number") {
+        localStorage.setItem("memberId", res.data);
+        console.log("logged memberId:-" + res.data);
+        onLogin(res.data);
+        navigate("/home");
+      } else {
+        setError("Unexpected response from server.");
+      }
     } catch (err) {
-      setError('Login failed. Please check credentials.');
+      if (err.response && err.response.status === 401) {
+        setError("Invalid username or password");
+      } else {
+        setError("Login failed. Please try again.");
+      }
     }
   };
 
@@ -29,16 +39,18 @@ function Login({ onLogin }) {
           className="login-input"
           placeholder="Username"
           value={form.username}
-          onChange={e => setForm({ ...form, username: e.target.value })}
+          onChange={(e) => setForm({ ...form, username: e.target.value })}
         />
         <input
           className="login-input"
           type="password"
           placeholder="Password"
           value={form.password}
-          onChange={e => setForm({ ...form, password: e.target.value })}
+          onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
-        <button className="login-button" type="submit">Login</button>
+        <button className="login-button" type="submit">
+          Login
+        </button>
         {error && <p className="login-error">{error}</p>}
       </form>
     </div>
