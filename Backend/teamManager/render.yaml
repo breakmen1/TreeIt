@@ -1,0 +1,65 @@
+services:
+  - type: web
+    name: teammanager-backend
+    env: java
+    repo: https://github.com/Abhaysinh8032/TeamManager
+    branch: main
+    buildCommand: |
+      sudo apt-get update
+      sudo apt-get install -y openjdk-17-jdk
+      export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      ./mvnw clean install
+    startCommand: java -jar target/*.jar
+    envVars:
+      - key: JAVA_HOME
+        value: /usr/lib/jvm/java-17-openjdk-amd64
+      - key: DATABASE_URL
+        value: services:
+  - type: web
+    name: teammanager-backend
+    env: java
+    repo: https://github.com/Abhaysinh8032/TeamManager
+    branch: main
+    buildCommand: |
+      sudo apt-get update
+      sudo apt-get install -y openjdk-17-jdk
+      export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      ./mvnw clean install
+    startCommand: java -jar target/*.jar
+    envVars:
+      - key: JAVA_HOME
+        value: /usr/lib/jvm/java-17-openjdk-amd64
+      - key: DATABASE_URL
+        value: services:
+  - type: web
+    name: teammanager-backend
+    env: java
+    repo: https://github.com/Abhaysinh8032/TeamManager
+    branch: main
+    buildCommand: |
+      sudo apt-get update
+      sudo apt-get install -y openjdk-17-jdk
+      export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      ./mvnw clean install
+    startCommand: java -jar target/*.jar
+    envVars:
+      - key: JAVA_HOME
+        value: /usr/lib/jvm/java-17-openjdk-amd64
+      - key: DATABASE_URL
+        value: yservices:
+  - type: web
+    name: teammanager-backend
+    env: java
+    repo: https://github.com/Abhaysinh8032/TeamManager
+    branch: main
+    buildCommand: |
+      sudo apt-get update
+      sudo apt-get install -y openjdk-17-jdk
+      export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+      ./mvnw clean install
+    startCommand: java -jar target/*.jar
+    envVars:
+      - key: JAVA_HOME
+        value: /usr/lib/jvm/java-17-openjdk-amd64
+      - key: DATABASE_URL
+        value: postgresql://team_manager:W3vi8bLZcPx31zO5tgaD0J4FwTZ0zgBd@dpg-d1rubp2li9vc7394neu0-a/team_manager_db_t32z
