@@ -4,7 +4,7 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 FROM openjdk:17.0.1-jdk-slim
-COPY --from=build/target/teamManager-0.0.1-SNAPSHOT.jar teamManager.jar
+COPY --from=build /target/teamManager-0.0.1-SNAPSHOT.jar teamManager.jar
 
 # Expose the app port
 EXPOSE 8080
