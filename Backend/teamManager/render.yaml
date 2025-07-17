@@ -9,7 +9,7 @@ services:
     healthCheckPath: /
     envVars:
       - key: SPRING_DATASOURCE_URL
-        value: jdbc:postgresql://dpg-d1rubp2li9vc7394neu0-a.oregon-postgres.render.com:5432/team_manager_db_t32z
+        value: postgres://team_manager:W3vi8bLZcPx31zO5tgaD0J4FwTZ0zgBd@dpg-d1rubp2li9vc7394neu0-a/team_manager_db_t32z
       - key: SPRING_DATASOURCE_USERNAME
         value: team_manager
       - key: SPRING_DATASOURCE_PASSWORD
