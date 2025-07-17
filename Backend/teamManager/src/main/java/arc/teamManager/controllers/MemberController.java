@@ -12,7 +12,6 @@ import arc.teamManager.repositories.MemberRepository;
 
 
 @RestController
-@CrossOrigin(origins = "https://team-manager-tan.vercel.app")
 public class MemberController {
     @Autowired
     MemberRepository memberRepository;
