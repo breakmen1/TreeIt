@@ -76,7 +76,7 @@ const Content = ({ selectedProjectId }) => {
 
       try {
         const res = await axios.get(
-          `http://localhost:2999/projects/${selectedProjectId}/members`
+          `https://teammanager-26h1.onrender.com/projects/${selectedProjectId}/members`
         );
         setProjectMembers(res.data);
       } catch (err) {
@@ -243,7 +243,7 @@ const Content = ({ selectedProjectId }) => {
       try {
         console.log("calling backend");
         const res = await axios.get(
-          `http://localhost:2999/load/${selectedProjectId}`
+          `https://teammanager-26h1.onrender.com/load/${selectedProjectId}`
         );
 
         const backendNodes = res.data.nodes.map((node) => ({
@@ -334,7 +334,7 @@ const Content = ({ selectedProjectId }) => {
       target: edge.target,
     }));
 
-    await axios.post("http://localhost:2999/save", {
+    await axios.post("https://teammanager-26h1.onrender.com/save", {
       nodes: formattedNodes,
       edges: formattedEdges,
     });

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:2999', // your Spring Boot port
+  baseURL: 'https://teammanager-26h1.onrender.com', // your Spring Boot port
   headers: {
     'Content-Type': 'application/json',
   },

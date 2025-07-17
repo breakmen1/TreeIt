@@ -17,7 +17,7 @@ const Home = () => {
 
   const fetchAllMembers = async () => {
   try {
-    const res = await axios.get("http://localhost:2999/members");
+    const res = await axios.get("https://teammanager-26h1.onrender.com/members");
     console.log("Fetched members:", res.data); // ✅ Add this to verify format
     setAllMembers(res.data); // might need res.data.members
   } catch (error) {
@@ -38,7 +38,7 @@ const Home = () => {
 
       try {
         const res = await axios.get(
-          `http://localhost:2999/projects/member/${memberId}`
+          `https://teammanager-26h1.onrender.com/projects/member/${memberId}`
         );
         setProjects(res.data);
       } catch (err) {
@@ -57,7 +57,7 @@ const Home = () => {
   const handleAddProject = async (name) => {
     try {
       const memberId = localStorage.getItem("memberId");
-      const response = await axios.post("http://localhost:2999/projects", {
+      const response = await axios.post("https://teammanager-26h1.onrender.com/projects", {
         name: name,
         // projectId: projectId,
         memberId: memberId,

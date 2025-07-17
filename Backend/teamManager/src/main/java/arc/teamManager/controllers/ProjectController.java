@@ -23,7 +23,7 @@ import arc.teamManager.services.ProjectService;
 
 @RestController
 @RequestMapping("/projects")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://team-manager-tan.vercel.app")
 public class ProjectController {
 
     @Autowired

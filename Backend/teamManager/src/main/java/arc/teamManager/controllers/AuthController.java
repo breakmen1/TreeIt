@@ -16,7 +16,7 @@ import arc.teamManager.services.MemberService;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "https://team-manager-tan.vercel.app")
 public class AuthController {
 
     @Autowired
