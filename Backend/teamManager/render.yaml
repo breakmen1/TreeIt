@@ -8,9 +8,13 @@ services:
     autoDeploy: true
     healthCheckPath: /
     envVars:
-      - key: SPRING_DATASOURCE_URL
-        value: postgres://team_manager:W3vi8bLZcPx31zO5tgaD0J4FwTZ0zgBd@dpg-d1rubp2li9vc7394neu0-a/team_manager_db_t32z
-      - key: SPRING_DATASOURCE_USERNAME
-        value: team_manager
-      - key: SPRING_DATASOURCE_PASSWORD
-        value: W3vi8bLZcPx31zO5tgaD0J4FwTZ0zgBd
+    - key: DB_HOST
+      value: dpg-d1rubp2li9vc7394neu0-a
+    - key: DB_PORT
+      value: 5432
+    - key: DB_NAME
+      value: team_manager_db_t32z
+    - key: DB_USER
+      value: team_manager
+    - key: DB_PASSWORD
+      value: W3vi8bLZcPx31zO5tgaD0J4FwTZ0zgBd
