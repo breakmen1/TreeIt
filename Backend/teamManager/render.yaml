@@ -2,7 +2,7 @@ services:
   - type: web
     runtime: docker
     name: teammanager-backend
-    repo: https://github.com/yourusername/TeamManager
+    repo: https://github.com/Abhaysinh8032/TeamManager
     branch: main
     dockerfilePath: ./Backend/teamManager/Dockerfile
     autoDeploy: true
