@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import arc.teamManager.entities.GraphNode;
 
 @Repository
-public interface NodeRepository extends JpaRepository<GraphNode, Long> {
+public interface NodeRepository extends JpaRepository<GraphNode, String> {
     List<GraphNode> findByProjectId(String projectId);
 }

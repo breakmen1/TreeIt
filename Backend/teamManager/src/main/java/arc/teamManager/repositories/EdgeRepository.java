@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import arc.teamManager.entities.GraphEdge;
 
 @Repository
-public interface EdgeRepository extends JpaRepository<GraphEdge, Long> {
+public interface EdgeRepository extends JpaRepository<GraphEdge, String> {
     List<GraphEdge> findByProjectId(String projectId);
 }
