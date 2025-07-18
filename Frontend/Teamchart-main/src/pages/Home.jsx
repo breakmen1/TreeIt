@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import LeftSidebar from "../components/LeftSide";
 import { FaBars } from "react-icons/fa";
 import { useGlobalContext } from "../components/Sidebar";
 import ReactFlowProviderContent from "../components/HomeComponent";
 import { v4 as uuidv4 } from "uuid";
+import api from "../components/BaseAPI";
 
 const Home = () => {
   const { openSidebar, isSidebarOpen } = useGlobalContext();
@@ -17,7 +17,7 @@ const Home = () => {
 
   const fetchAllMembers = async () => {
   try {
-    const res = await axios.get("https://teammanager-26h1.onrender.com/members");
+    const res = await api.get(`/members`);
     console.log("Fetched members:", res.data); // ✅ Add this to verify format
     setAllMembers(res.data); // might need res.data.members
   } catch (error) {
@@ -37,8 +37,8 @@ const Home = () => {
       if (!memberId) return;
 
       try {
-        const res = await axios.get(
-          `https://teammanager-26h1.onrender.com/projects/member/${memberId}`
+        const res = await api.get(
+          `/projects/member/${memberId}`
         );
         setProjects(res.data);
       } catch (err) {
@@ -57,7 +57,7 @@ const Home = () => {
   const handleAddProject = async (name) => {
     try {
       const memberId = localStorage.getItem("memberId");
-      const response = await axios.post("https://teammanager-26h1.onrender.com/projects", {
+      const response = await api.post(`/projects`, {
         name: name,
         // projectId: projectId,
         memberId: memberId,
@@ -69,6 +69,7 @@ const Home = () => {
       setIsModalOpen(false);
       setNewProjectName("");
       setSelectedMembers([]);
+      
     } catch (err) {
       console.error("Failed to create project:", err);
     }
@@ -126,7 +127,7 @@ const Home = () => {
             />
 
             <div className="max-h-40 overflow-y-auto border p-2 mb-4">
-              {allMembers.map((member) => (
+              {allMembers.filter((member) => member.memberId != localStorage.getItem("memberId")).map((member) => (
                 <label key={member.memberId} className="block mb-1 text-sm">
                   <input
                     type="checkbox"
