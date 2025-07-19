@@ -1,0 +1,16 @@
+services:
+  - type: web
+    runtime: docker
+    name: teammanager-backend
+    repo: https://github.com/Abhaysinh8032/TeamManager
+    branch: main
+    dockerfilePath: ./Backend/teamManager/Dockerfile
+    autoDeploy: true
+    healthCheckPath: /
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://dpg-d1rubp2li9vc7394neu0-a.oregon-postgres.render.com:5432/team_manager_db_t32z
+      - key: SPRING_DATASOURCE_USERNAME
+        value: team_manager
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: W3vi8bLZcPx31zO5tgaD0J4FwTZ0zgBd

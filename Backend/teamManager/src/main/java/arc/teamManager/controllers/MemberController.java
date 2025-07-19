@@ -12,7 +12,6 @@ import arc.teamManager.repositories.MemberRepository;
 
 
 @RestController
-@CrossOrigin(origins = "http://localhost:3000")
 public class MemberController {
     @Autowired
     MemberRepository memberRepository;

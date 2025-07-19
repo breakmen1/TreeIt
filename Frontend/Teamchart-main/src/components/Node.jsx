@@ -8,6 +8,20 @@ export default function CircleNode({ data }) {
   const [isHovered, setIsHovered] = useState(false);
   const timeoutRef = useRef(null);
 
+  const getRemainingTime = (deadline) => {
+    const now = new Date();
+    const end = new Date(deadline);
+    const diff = end - now;
+
+    if (diff <= 0) return "Past due";
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const min = Math.floor((diff/(1000 * 60)) % 60 );
+
+    return ` ${days}d ${hours}h ${min}m `;
+  };
+
   const handleMouseEnter = () => {
     clearTimeout(timeoutRef.current); // prevent early hide
     setIsHovered(true);
@@ -46,13 +60,14 @@ export default function CircleNode({ data }) {
         ref={nodeRef}
         className="flex items-center justify-center w-[60px] h-[60px] rounded-full"
         style={{
-          backgroundColor: data.status === "completed"
-            ? "#4ade80" // green
-            : data.status === "pending"
+          backgroundColor:
+            data.status === "completed"
+              ? "#4ade80" // green
+              : data.status === "pending"
               ? "#60a5fa" // blue
               : data.status === "stuck"
-                ? "#f87171" // red
-                : "#e5e7eb",
+              ? "#f87171" // red
+              : "#e5e7eb",
           border: "2px solid #9ca3af",
         }}
       >
@@ -65,15 +80,19 @@ export default function CircleNode({ data }) {
           <div className="px-3 py-2 bg-black text-white text-xs rounded-md shadow-md whitespace-nowrap">
             <div className="flex items-start gap-2 mb-1">
               <FaTasks className="mt-[2px] text-yellow-400" />
-              <span><strong>Task:</strong> {data.task}</span>
+              <span>
+                <strong>Task:</strong> {data.task}
+              </span>
             </div>
             <div className="flex items-start gap-2">
               <FaUser className="mt-[2px] text-green-400" />
-              <span><strong>Assigned:</strong> {data.assignedTo}</span>
+              <span>
+                <strong>Assigned:</strong> {data.assignedTo}
+              </span>
             </div>
             <div className="mt-1">
-              <strong>Deadline:</strong>{" "}
-              {data.deadline ? new Date(data.deadline).toLocaleString() : "None"}
+              <strong>Remaining:</strong>{" "}
+              {data.deadline ? getRemainingTime(data.deadline) : "None"}
             </div>
             <div className="mt-1">
               <label>

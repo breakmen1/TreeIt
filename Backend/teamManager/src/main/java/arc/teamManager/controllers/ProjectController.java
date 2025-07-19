@@ -23,7 +23,6 @@ import arc.teamManager.services.ProjectService;
 
 @RestController
 @RequestMapping("/projects")
-@CrossOrigin(origins = "http://localhost:3000")
 public class ProjectController {
 
     @Autowired
@@ -55,7 +54,9 @@ public class ProjectController {
         Project project = new Project();
         project.setMember(member);
         project.setName(projectDTO.getName());
-        project.setMembers(memberRepository.findAllById(projectDTO.getMemberIds()));
+        List<Member> projectMembers = memberRepository.findAllById(projectDTO.getMemberIds());
+        projectMembers.add(member);
+        project.setMembers(projectMembers);
 
         Project savedProject = projectRepository.save(project);
         return savedProject;

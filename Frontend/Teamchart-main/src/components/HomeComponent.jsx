@@ -6,8 +6,8 @@ import React, {
   useMemo,
 } from "react";
 import CircleNode from "./Node";
-import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
+import api from "./BaseAPI";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -75,8 +75,8 @@ const Content = ({ selectedProjectId }) => {
       if (!selectedProjectId) return;
 
       try {
-        const res = await axios.get(
-          `http://localhost:2999/projects/${selectedProjectId}/members`
+        const res = await api.get(
+          `/projects/${selectedProjectId}/members`
         );
         setProjectMembers(res.data);
       } catch (err) {
@@ -242,8 +242,8 @@ const Content = ({ selectedProjectId }) => {
 
       try {
         console.log("calling backend");
-        const res = await axios.get(
-          `http://localhost:2999/load/${selectedProjectId}`
+        const res = await api.get(
+          `/load/${selectedProjectId}`
         );
 
         const backendNodes = res.data.nodes.map((node) => ({
@@ -334,7 +334,7 @@ const Content = ({ selectedProjectId }) => {
       target: edge.target,
     }));
 
-    await axios.post("http://localhost:2999/save", {
+    await api.post(`/save`, {
       nodes: formattedNodes,
       edges: formattedEdges,
     });
