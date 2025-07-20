@@ -29,6 +29,7 @@ import { BiSolidDockLeft } from "react-icons/bi";
 import { FaHeart } from "react-icons/fa";
 import { useGlobalContext } from "./Sidebar";
 import "reactflow/dist/style.css";
+import NodeDetailsModal from "./NodeDetailsModal";
 
 const nodeTypes = {
   circle: CircleNode,
@@ -61,6 +62,10 @@ const Content = ({ selectedProjectId }) => {
   const [menu, setMenu] = useState(null);
   const ref = useRef(null);
   const [projectMembers, setProjectMembers] = useState([]);
+  const [nodeDescription, setNodeDescription] = useState("");
+  const [todos, setTodos] = useState([]);
+  const [showModal, setShowModal] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
 
   const [newNodeInput, setNewNodeInput] = useState({
     id: "",
@@ -75,9 +80,7 @@ const Content = ({ selectedProjectId }) => {
       if (!selectedProjectId) return;
 
       try {
-        const res = await api.get(
-          `/projects/${selectedProjectId}/members`
-        );
+        const res = await api.get(`/projects/${selectedProjectId}/members`);
         setProjectMembers(res.data);
       } catch (err) {
         console.error("Failed to fetch project members:", err);
@@ -180,11 +183,23 @@ const Content = ({ selectedProjectId }) => {
   const onPaneClick = useCallback(() => setMenu(null), [setMenu]);
 
   // Handle node click
-  const onNodeClick = useCallback((event, node) => {
+  const onNodeClick = useCallback(async (event, node) => {
     setSelectedElements([node]);
     setNodeName(node.data.task);
     setNodeId(node.id);
     setNodeColor("transparent");
+
+    try {
+      const res = await api.get(`/nodes/${node.id}/todos`);
+      const data = res.data; // Axios gives parsed response here
+
+      setTodos(data);
+      setNodeDescription(node.data.description || ""); // fallback
+      setIsCompleted(node.data.status === "COMPLETED");
+      setShowModal(true);
+    } catch (error) {
+      console.error("Failed to fetch todos", error);
+    }
   }, []);
   const onEdgeUpdateStart = useCallback(() => {
     edgeUpdateSuccessful.current = false;
@@ -242,10 +257,7 @@ const Content = ({ selectedProjectId }) => {
 
       try {
         console.log("calling backend");
-        const res = await api.get(
-          `/load/${selectedProjectId}`
-        );
-
+        const res = await api.get(`/load/${selectedProjectId}`);
         const backendNodes = res.data.nodes.map((node) => ({
           id: node.graphNodeId.toString(),
           position: { x: node.posX, y: node.posY },
@@ -496,6 +508,55 @@ const Content = ({ selectedProjectId }) => {
       <Background variant="dots" gap={12} size={1} />
       {/* context menu */}
       {menu && <ContextMenu onClick={onPaneClick} {...menu} />}
+
+      <NodeDetailsModal
+        show={showModal}
+        onClose={() => setShowModal(false)}
+        nodeName={nodeName}
+        description={nodeDescription}
+        todos={todos}
+        isCompleted={isCompleted}
+        onToggleTodo={async (todoId) => {
+          await api.post(`/todos/${todoId}/toggle`);
+          const res = await api.get(`/nodes/${nodeId}/todos`);
+          setTodos(res.data); // No need for res.json() if you're using axios
+        }}
+        onMarkCompleted={async () => {
+          try {
+            await api.post(`/nodes/${nodeId}/complete`);
+            setIsCompleted(true);
+            setNodeColor("green");
+            setShowModal(false);
+            setNodes((prevNodes) =>
+              prevNodes.map((node) =>
+                node.id === nodeId
+                  ? { ...node, data: { ...node.data, status: "completed" } }
+                  : node
+              )
+            );
+            alert("Node marked as completed successfully!");
+          } catch (error) {
+            // If error response is from backend, show an alert
+            if (error.response && error.response.data) {
+              alert(
+                error.response.data.message ||
+                  "All todos must be completed before marking as completed."
+              );
+            } else {
+              alert("Something went wrong. Please try again.");
+            }
+          }
+        }}
+        onAddTodo={async (newTask) => {
+          const localMemberId = localStorage.getItem("memberId");
+          await api.post(`/nodes/${nodeId}/todos`, {
+            task: newTask,
+            memberId: localMemberId,
+          });
+          const res = await api.get(`/nodes/${nodeId}/todos`);
+          setTodos(res.data);
+        }}
+      />
     </ReactFlow>
   );
 };

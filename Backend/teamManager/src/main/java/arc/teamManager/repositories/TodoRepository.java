@@ -5,10 +5,9 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import arc.teamManager.entities.GraphNode;
+import arc.teamManager.entities.Todo;
 
 @Repository
-public interface NodeRepository extends JpaRepository<GraphNode, String> {
-    List<GraphNode> findByProjectId(String projectId);
-    
+public interface TodoRepository extends JpaRepository<Todo, Long> {
+    List<Todo> findByNode_GraphNodeId(String nodeId);
 }

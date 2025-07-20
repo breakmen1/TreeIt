@@ -1,12 +1,15 @@
 package arc.teamManager.entities;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,4 +49,86 @@ public class GraphNode {
     @Column(name = "POS_Y")
     private int posY;
 
+    @OneToMany(mappedBy="node", cascade=CascadeType.ALL)
+    private List<Todo> todos;
+
+	public String getGraphNodeId() {
+		return graphNodeId;
+	}
+
+	public void setGraphNodeId(String graphNodeId) {
+		this.graphNodeId = graphNodeId;
+	}
+
+	public String getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(String projectId) {
+		this.projectId = projectId;
+	}
+
+	public String getTask() {
+		return task;
+	}
+
+	public void setTask(String task) {
+		this.task = task;
+	}
+
+	public String getAssignedTo() {
+		return assignedTo;
+	}
+
+	public void setAssignedTo(String assignedTo) {
+		this.assignedTo = assignedTo;
+	}
+
+	public LocalDateTime getAssignedAt() {
+		return assignedAt;
+	}
+
+	public void setAssignedAt(LocalDateTime assignedAt) {
+		this.assignedAt = assignedAt;
+	}
+
+	public String getDeadline() {
+		return deadline;
+	}
+
+	public void setDeadline(String deadline) {
+		this.deadline = deadline;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public int getPosX() {
+		return posX;
+	}
+
+	public void setPosX(int posX) {
+		this.posX = posX;
+	}
+
+	public int getPosY() {
+		return posY;
+	}
+
+	public void setPosY(int posY) {
+		this.posY = posY;
+	}
+
+	public List<Todo> getTodos() {
+		return todos;
+	}
+
+	public void setTodos(List<Todo> todos) {
+		this.todos = todos;
+	}
 }
