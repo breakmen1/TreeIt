@@ -7,6 +7,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.ReflectionUtils.DescribedFieldFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -27,6 +28,7 @@ import arc.teamManager.entities.Todo;
 import arc.teamManager.models.GraphDataRequest;
 import arc.teamManager.repositories.EdgeRepository;
 import arc.teamManager.repositories.NodeRepository;
+import arc.teamManager.services.NodeService;
 import arc.teamManager.services.TodoService;
 
 @RestController
@@ -40,6 +42,9 @@ public class NodeController {
     @Autowired
     private TodoService todoService;
 
+    @Autowired
+    private NodeService nodeService;
+
     Logger log =  LoggerFactory.getLogger(this.getClass());
 
     @PostMapping("/save")
@@ -49,6 +54,21 @@ public class NodeController {
         return ResponseEntity.ok("Saved successfully");
     }
 
+
+    //to modify description
+    @PostMapping("/updateDescription")
+    public ResponseEntity<String> updateDescription(@RequestBody String description, @RequestBody String nodeId){
+        String updatedDescription = nodeService.updatedDescription(description,nodeId);
+        return ResponseEntity.ok("");
+    }
+
+    
+    public String postMethodName(@RequestBody String entity) {
+        //TODO: process POST request
+        
+        return entity;
+    }
+    
     @GetMapping("/load/{projectId}")
     public ResponseEntity<GraphDataRequest> loadGraph(@PathVariable String projectId) {
         try {
