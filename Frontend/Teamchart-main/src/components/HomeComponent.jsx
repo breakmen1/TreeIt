@@ -195,6 +195,7 @@ const Content = ({ selectedProjectId }) => {
 
       setTodos(data);
       setNodeDescription(node.data.description || ""); // fallback
+      console.log("description is -->"+ node.data.description);
       setIsCompleted(node.data.status === "COMPLETED");
       setShowModal(true);
     } catch (error) {

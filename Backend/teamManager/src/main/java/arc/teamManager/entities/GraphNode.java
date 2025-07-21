@@ -52,6 +52,9 @@ public class GraphNode {
     @OneToMany(mappedBy="node", cascade=CascadeType.ALL)
     private List<Todo> todos;
 
+	@Column(columnDefinition = "TEXT",name ="DESCRIPTION")
+	private String description;
+
 	public String getGraphNodeId() {
 		return graphNodeId;
 	}
