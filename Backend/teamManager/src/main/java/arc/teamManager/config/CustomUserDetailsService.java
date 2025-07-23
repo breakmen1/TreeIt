@@ -13,7 +13,7 @@ import arc.teamManager.entities.Member;
 import arc.teamManager.repositories.MemberRepository;
 
 @Service
-public class MemberDetailsService implements UserDetailsService {
+public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
     private MemberRepository memberRepository;

@@ -105,12 +105,12 @@ const Content = ({ selectedProjectId }) => {
             prevNodes.map((n) =>
               n.id === node.id
                 ? {
-                    ...n,
-                    data: {
-                      ...n.data,
-                      status: newStatus,
-                    },
-                  }
+                  ...n,
+                  data: {
+                    ...n.data,
+                    status: newStatus,
+                  },
+                }
                 : n
             )
           );
@@ -195,7 +195,7 @@ const Content = ({ selectedProjectId }) => {
 
       setTodos(data);
       setNodeDescription(node.data.description || ""); // fallback
-      console.log("description is -->"+ node.data.description);
+      console.log("description is -->" + node.data.description);
       setIsCompleted(node.data.status === "COMPLETED");
       setShowModal(true);
     } catch (error) {
@@ -225,7 +225,11 @@ const Content = ({ selectedProjectId }) => {
     [setEdges]
   );
 
-  const handleCreateNode = () => {
+  const handleCreateNode = async () => {
+    if (!newNodeInput.assignedTo) {
+      alert("Please select a member before creating the node.");
+      return;
+    }
     const newNode = {
       id: uuidv4(),
       position: { x: 100, y: 100 },
@@ -247,9 +251,39 @@ const Content = ({ selectedProjectId }) => {
         },
       },
     };
+    const updatedNodes = [...nodes, newNode]; // use current state + new node
+    setNodes(updatedNodes);
+    setNewNodeInput({ id: "", assignedTo: "", name: "", color: "#ffffff" });
+    await saveGraphNoAlert(updatedNodes, edges);
+  };
+  const saveGraphNoAlert = async (nodesArg, edgesArg) => {
+    const formattedNodes = nodesArg.map((node) => ({
+      graphNodeId: node.id, // 👈 pass ID from React Flow node
+      projectId: node.data.projectId,
+      task: node.data.task,
+      assignedTo: node.data.assignedTo,
+      assignedAt: new Date().toISOString(), // if needed
+      deadline: node.data.deadline,
+      status: node.data.status,
+      posX: node.position.x,
+      posY: node.position.y,
+    }));
+    const formattedEdges = edgesArg.map((edge) => ({
+      graphEdgeId: edge.id, // 👈 use same ID from frontend
+      projectId: selectedProjectId,
+      source: edge.source,
+      target: edge.target,
+    }));
 
-    setNodes((prevNodes) => [...prevNodes, newNode]);
-    setNewNodeInput({ id: "", name: "", color: "#ffffff" });
+    await api.post(`/save`, {
+      nodes: formattedNodes,
+      edges: formattedEdges,
+    });
+
+  };
+  const saveGraph = async () => {
+    await saveGraphNoAlert(nodes, edges);
+    alert("Graph saved!");
   };
 
   useEffect(() => {
@@ -327,34 +361,6 @@ const Content = ({ selectedProjectId }) => {
     [reactFlowInstance, getId, setNodes]
   );
 
-  const saveGraph = async () => {
-    const formattedNodes = nodes.map((node) => ({
-      graphNodeId: node.id, // 👈 pass ID from React Flow node
-      projectId: node.data.projectId,
-      task: node.data.task,
-      assignedTo: node.data.assignedTo,
-      assignedAt: new Date().toISOString(), // if needed
-      deadline: node.data.deadline,
-      status: node.data.status,
-      posX: node.position.x,
-      posY: node.position.y,
-    }));
-
-    const formattedEdges = edges.map((edge) => ({
-      graphEdgeId: edge.id, // 👈 use same ID from frontend
-      projectId: selectedProjectId,
-      source: edge.source,
-      target: edge.target,
-    }));
-
-    await api.post(`/save`, {
-      nodes: formattedNodes,
-      edges: formattedEdges,
-    });
-
-    alert("Graph saved!");
-  };
-
   return (
     <ReactFlow
       ref={ref}
@@ -376,9 +382,8 @@ const Content = ({ selectedProjectId }) => {
     >
       {/* sidebar */}
       <div
-        className={`transition-all  duration-500  fixed top-0 ${
-          isSidebarOpen ? "right-0" : "-right-64"
-        }`}
+        className={`transition-all  duration-500  fixed top-0 ${isSidebarOpen ? "right-0" : "-right-64"
+          }`}
       >
         <div className="relative flex flex-col w-64 h-screen min-h-screen px-4 py-8 overflow-y-auto bg-white border-r">
           <div className="">
@@ -412,20 +417,6 @@ const Content = ({ selectedProjectId }) => {
                     value={newNodeInput.taskDescription}
                   />
 
-                  {/* <input
-                    type="text"
-                    placeholder="Assigned to"
-                    className="p-[1px] border pl-1 "
-                    onChange={(e) =>
-                      setNewNodeInput((prev) => ({
-                        ...prev,
-                        assignedTo: e.target.value,
-                      }))
-                    }
-
-                    
-                    value={newNodeInput.assignedTo}
-                  /> */}
                   <select
                     className="p-[1px] border pl-1"
                     value={newNodeInput.assignedTo}
@@ -541,7 +532,7 @@ const Content = ({ selectedProjectId }) => {
             if (error.response && error.response.data) {
               alert(
                 error.response.data.message ||
-                  "All todos must be completed before marking as completed."
+                "All todos must be completed before marking as completed."
               );
             } else {
               alert("Something went wrong. Please try again.");
@@ -568,9 +559,8 @@ const ReactFlowProviderContent = ({ selectedProjectId }) => {
   return (
     <ReactFlowProvider>
       <div
-        className={`h-[calc(100vh-74px)] flex flex-col  ${
-          isSidebarOpen ? "mr-64" : ""
-        }`}
+        className={`h-[calc(100vh-74px)] flex flex-col  ${isSidebarOpen ? "mr-64" : ""
+          }`}
       >
         <Content selectedProjectId={selectedProjectId} />
       </div>
