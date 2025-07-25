@@ -1,6 +1,7 @@
 import React, { useCallback } from "react";
 import { useReactFlow } from "reactflow";
 import {layoutNodesWithDagre} from "./DagreLayoutHelper";
+import api from "./BaseAPI";
 
 export default function ContextMenu({
   id,
@@ -26,6 +27,8 @@ export default function ContextMenu({
 
 
   const deleteNode = useCallback(() => {
+    const deletedNode = api.post(`/nodes/${id}/deleteNode`);
+    // const responseStr = api.post(`/nodes/${id}/deleteEdges`);
     setNodes((nodes) => nodes.filter((node) => node.id !== id));
     setEdges((edges) => edges.filter((edge) => edge.source !== id));
   }, [id, setNodes, setEdges]);

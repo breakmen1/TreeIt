@@ -1,21 +1,18 @@
 package arc.teamManager.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-
 import arc.teamManager.entities.GraphNode;
-import arc.teamManager.models.GraphDataRequest;
-import arc.teamManager.repositories.EdgeRepository;
 import arc.teamManager.repositories.NodeRepository;
-
+import arc.teamManager.repositories.EdgeRepository;
 @Service
 public class NodeService {
 
     @Autowired
     private NodeRepository nodeRepo;
+
+    @Autowired
+    private EdgeRepository edgeRepo;
 
     public String updatedDescription(String description, String nodeId) {
         GraphNode node = nodeRepo.findById(nodeId)
@@ -25,6 +22,20 @@ public class NodeService {
         GraphNode resNode = nodeRepo.save(node);
         String updatedDescription = resNode.getDescription();
         return updatedDescription;
+    }
+
+    public GraphNode deleteNode(String nodeId) {
+        GraphNode deletedNode = nodeRepo.findById(nodeId).orElse(null);
+        if (deletedNode != null) {
+            nodeRepo.deleteById(nodeId);
+        }
+        return deletedNode;
+    }
+
+    public String deleteNodeEdges(String nodeId) {
+        edgeRepo.deleteBySource(nodeId);
+        edgeRepo.deleteByTarget(nodeId);
+        return "deleted..";
     }
 
 }

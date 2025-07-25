@@ -17,7 +17,7 @@ export default function CircleNode({ data }) {
 
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const min = Math.floor((diff/(1000 * 60)) % 60 );
+    const min = Math.floor((diff / (1000 * 60)) % 60);
 
     return ` ${days}d ${hours}h ${min}m `;
   };
@@ -64,10 +64,10 @@ export default function CircleNode({ data }) {
             data.status === "completed"
               ? "#4ade80" // green
               : data.status === "pending"
-              ? "#60a5fa" // blue
-              : data.status === "stuck"
-              ? "#f87171" // red
-              : "#e5e7eb",
+                ? "#60a5fa" // blue
+                : data.status === "stuck"
+                  ? "#f87171" // red
+                  : "#e5e7eb",
           border: "2px solid #9ca3af",
         }}
       >
@@ -109,6 +109,14 @@ export default function CircleNode({ data }) {
                   <option value="stuck">Stuck</option>
                 </select>
               </label>
+            </div>
+            <button onClick={(e) => {
+              // simulate a click event with current node
+              if (data.onNodeClick) {
+                data.onNodeClick(e, { id: data.id, data }); // pass node ID and data
+              }
+            }}>click me</button>
+            <div>
             </div>
           </div>
         </div>

@@ -9,7 +9,8 @@ const tooltipRoot = document.getElementById("tooltip-root") || (() => {
 
 export default function TooltipPortal({ children, style }) {
   return ReactDOM.createPortal(
-    <div style={{ position: "absolute", zIndex: 99999, ...style }}>
+    <div onClick={(e) => e.stopPropagation()}
+    style={{ position: "absolute", zIndex: 99999, ...style }}>
       {children}
     </div>,
     tooltipRoot

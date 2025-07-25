@@ -1,20 +1,12 @@
 package arc.teamManager.controllers;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.ReflectionUtils.DescribedFieldFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 import arc.teamManager.dto.TodoRequest;
 import arc.teamManager.entities.GraphEdge;
 import arc.teamManager.entities.GraphNode;
-import arc.teamManager.entities.Member;
 import arc.teamManager.entities.Todo;
 import arc.teamManager.models.GraphDataRequest;
 import arc.teamManager.repositories.EdgeRepository;
@@ -116,4 +107,15 @@ public class NodeController {
     public GraphNode markNodeCompleted(@PathVariable String nodeId) {
         return todoService.markNodeComplete(nodeId);
     }
+
+    @PostMapping("/nodes/{nodeId}/deleteNode")
+    public GraphNode deleteNode(@PathVariable String nodeId) {
+        return nodeService.deleteNode(nodeId);
+    }
+
+    @PostMapping("/nodes/{nodeId}/deleteEdges")
+    public String deleteEdges(@PathVariable String nodeId) {
+        return nodeService.deleteNodeEdges(nodeId);
+    }
+
 }

@@ -10,4 +10,6 @@ import arc.teamManager.entities.GraphEdge;
 @Repository
 public interface EdgeRepository extends JpaRepository<GraphEdge, String> {
     List<GraphEdge> findByProjectId(String projectId);
+    void deleteBySource(String source);
+    void deleteByTarget(String target);
 }
