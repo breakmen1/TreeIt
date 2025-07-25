@@ -56,7 +56,7 @@ const Content = ({ selectedProjectId }) => {
   const [nodeName, setNodeName] = useState();
   const [nodeId, setNodeId] = useState();
   const [nodeColor, setNodeColor] = useState("#ffffff");
-  const [selectedElements, setSelectedElements] = useState([]);
+  const [selectedNode, setSelectedNode] = useState(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const edgeUpdateSuccessful = useRef(true);
   const [menu, setMenu] = useState(null);
@@ -66,6 +66,7 @@ const Content = ({ selectedProjectId }) => {
   const [todos, setTodos] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [status, setStatus] = useState("");
 
   const [newNodeInput, setNewNodeInput] = useState({
     id: "",
@@ -184,10 +185,11 @@ const Content = ({ selectedProjectId }) => {
 
   // Handle node click
   const onNodeClick = useCallback(async (event, node) => {
-    setSelectedElements([node]);
+    setSelectedNode(node);
     setNodeName(node.data.task);
     setNodeId(node.id);
     setNodeColor("transparent");
+    setStatus(node.data.status || "");
 
     try {
       const res = await api.get(`/nodes/${node.id}/todos`);
@@ -230,6 +232,10 @@ const Content = ({ selectedProjectId }) => {
       alert("Please select a member before creating the node.");
       return;
     }
+    if (new Date(newNodeInput.deadline) < new Date()) {
+      alert("Your deadline has passed before creation, please select new deadline");
+      return;
+    }
     const newNode = {
       id: uuidv4(),
       position: { x: 100, y: 100 },
@@ -253,7 +259,7 @@ const Content = ({ selectedProjectId }) => {
     };
     const updatedNodes = [...nodes, newNode]; // use current state + new node
     setNodes(updatedNodes);
-    setNewNodeInput({ id: "", assignedTo: "", name: "", color: "#ffffff" });
+    setNewNodeInput({ id: "", assignedTo: "", taskDescription: "", deadline: new Date().toISOString(), name: "", color: "#ffffff" });
     await saveGraphNoAlert(updatedNodes, edges);
   };
   const saveGraphNoAlert = async (nodesArg, edgesArg) => {
@@ -327,6 +333,17 @@ const Content = ({ selectedProjectId }) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
   }, []);
+
+  const getLocalDateTime = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = `${now.getMonth() + 1}`.padStart(2, "0");
+    const day = `${now.getDate()}`.padStart(2, "0");
+    const hours = `${now.getHours()}`.padStart(2, "0");
+    const minutes = `${now.getMinutes()}`.padStart(2, "0");
+
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  };
 
   const onDrop = useCallback(
     (event) => {
@@ -440,13 +457,23 @@ const Content = ({ selectedProjectId }) => {
                     placeholder="Deadline"
                     className="p-[1px] border pl-1"
                     value={newNodeInput.deadline}
-                    onChange={(e) =>
+                    min={getLocalDateTime()}
+                    onChange={(e) => {
+                      const selectedTime = new Date(e.target.value);
+                      const now = new Date();
+
+                      if (selectedTime < now) {
+                        alert("Please select a future date and time.");
+                        return; // don't update state
+                      }
+
                       setNewNodeInput((prev) => ({
                         ...prev,
                         deadline: e.target.value,
-                      }))
-                    }
+                      }));
+                    }}
                   />
+
 
                   <button
                     className="p-[4px]  text-white bg-slate-700 hover:bg-slate-800 active:bg-slate-900 rounded"
@@ -456,10 +483,8 @@ const Content = ({ selectedProjectId }) => {
                   </button>
                 </div>
               </div>
-              <hr className="my-2" />
               {/* Save and Restore Buttons */}
               <div className="flex flex-col space-y-3">
-                <div className="text-lg font-bold text-black">Controls</div>
                 <div className="flex flex-row space-x-3">
                   <button
                     className="flex-1 p-2 text-sm text-white transition duration-300 ease-in-out rounded bg-slate-700 hover:bg-slate-800 active:bg-slate-900"
@@ -547,6 +572,28 @@ const Content = ({ selectedProjectId }) => {
           });
           const res = await api.get(`/nodes/${nodeId}/todos`);
           setTodos(res.data);
+        }}
+        status={status}
+        onStatusChange={(newStatus) => {
+          if (!nodeId) return;
+
+          // Update node color
+          const colorMap = {
+            pending: "#3b82f6",
+            stuck: "#facc15",
+            completed: "green",
+          };
+
+          setNodeColor(colorMap[newStatus] || "#ffffff");
+          setStatus(newStatus);
+
+          setNodes((prevNodes) =>
+            prevNodes.map((n) =>
+              n.id === nodeId
+                ? { ...n, data: { ...n.data, status: newStatus } }
+                : n
+            )
+          );
         }}
       />
     </ReactFlow>

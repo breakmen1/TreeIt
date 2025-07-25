@@ -14,17 +14,18 @@ const Home = () => {
   const [allMembers, setAllMembers] = useState([]);
   const [newProjectName, setNewProjectName] = useState("");
   const [selectedMembers, setSelectedMembers] = useState([]);
+  const [nameError, setNameError] = useState(false);
 
   const fetchAllMembers = async () => {
-  try {
-    const res = await api.get(`/members`);
-    console.log("Fetched members:", res.data); // ✅ Add this to verify format
-    setAllMembers(res.data); // might need res.data.members
-  } catch (error) {
-    console.error("Error fetching members:", error);
-    setAllMembers([]); // fallback to empty array to prevent map error
-  }
-};
+    try {
+      const res = await api.get(`/members`);
+      console.log("Fetched members:", res.data); // ✅ Add this to verify format
+      setAllMembers(res.data); // might need res.data.members
+    } catch (error) {
+      console.error("Error fetching members:", error);
+      setAllMembers([]); // fallback to empty array to prevent map error
+    }
+  };
 
   useEffect(() => {
     if (isModalOpen) fetchAllMembers();
@@ -55,6 +56,11 @@ const Home = () => {
 
   // ✅ Add new project to backend
   const handleAddProject = async (name) => {
+    if (!newProjectName.trim()) {
+      setNameError(true);
+      return;
+    }
+    setNameError(false);
     try {
       const memberId = localStorage.getItem("memberId");
       const response = await api.post(`/projects`, {
@@ -64,14 +70,15 @@ const Home = () => {
         memberIds: selectedMembers
       });
 
-      setProjects((prev) => [...prev, response.data]);
       console.log(response.data);
+      setProjects((prev) => [...prev, response.data]);
       setIsModalOpen(false);
       setNewProjectName("");
       setSelectedMembers([]);
-      
+
     } catch (err) {
-      console.error("Failed to create project:", err);
+      console.error("Select some members first");
+      alert("Please select atleast one member before creating project");
     }
   };
 
@@ -94,9 +101,8 @@ const Home = () => {
         <div>
           <button
             onClick={openSidebar}
-            className={`${
-              isSidebarOpen ? "translate-x-8" : "translate-x-0"
-            } fixed top-4 right-4 transition transform ease-linear duration-500 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center active:bg-gray-300 focus:outline-none hover:bg-gray-200 hover:text-gray-800`}
+            className={`${isSidebarOpen ? "translate-x-8" : "translate-x-0"
+              } fixed top-4 right-4 transition transform ease-linear duration-500 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center active:bg-gray-300 focus:outline-none hover:bg-gray-200 hover:text-gray-800`}
           >
             <FaBars className="w-5 h-5" />
           </button>
@@ -122,9 +128,16 @@ const Home = () => {
               type="text"
               placeholder="Project Name"
               value={newProjectName}
-              onChange={(e) => setNewProjectName(e.target.value)}
-              className="w-full mb-3 border px-3 py-2"
+              onChange={(e) => {
+                setNewProjectName(e.target.value);
+                if (nameError) setNameError(false); // clear error on typing
+              }}
+              className={`w-full mb-1 border px-3 py-2 ${nameError ? "border-red-500" : "border-gray-300"
+                }`}
             />
+            {nameError && (
+              <p className="text-red-500 text-sm mb-3">Project name is required.</p>
+            )}
 
             <div className="max-h-40 overflow-y-auto border p-2 mb-4">
               {allMembers.filter((member) => member.memberId != localStorage.getItem("memberId")).map((member) => (

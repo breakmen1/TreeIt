@@ -94,30 +94,6 @@ export default function CircleNode({ data }) {
               <strong>Remaining:</strong>{" "}
               {data.deadline ? getRemainingTime(data.deadline) : "None"}
             </div>
-            <div className="mt-1">
-              <label>
-                <strong>Status:</strong>
-                <select
-                  className="ml-1 text-black rounded"
-                  value={data.status}
-                  onChange={(e) => {
-                    data.onStatusChange?.(e.target.value);
-                  }}
-                >
-                  <option value="pending">Pending</option>
-                  <option value="completed">Completed</option>
-                  <option value="stuck">Stuck</option>
-                </select>
-              </label>
-            </div>
-            <button onClick={(e) => {
-              // simulate a click event with current node
-              if (data.onNodeClick) {
-                data.onNodeClick(e, { id: data.id, data }); // pass node ID and data
-              }
-            }}>click me</button>
-            <div>
-            </div>
           </div>
         </div>
       )}
