@@ -5,6 +5,14 @@ import { useGlobalContext } from "../components/Sidebar";
 import ReactFlowProviderContent from "../components/HomeComponent";
 import { v4 as uuidv4 } from "uuid";
 import api from "../components/BaseAPI";
+import { showError, showSuccess, showInfo } from "../utils/ToastUtil";
+import {
+  showErrorAlert,
+  showSuccessAlert,
+  showConfirmAlert,
+} from '../utils/SweetAlertUtil';
+
+
 
 const Home = () => {
   const { openSidebar, isSidebarOpen } = useGlobalContext();
@@ -58,6 +66,7 @@ const Home = () => {
   const handleAddProject = async (name) => {
     if (!newProjectName.trim()) {
       setNameError(true);
+      showError("Give any project name");
       return;
     }
     setNameError(false);

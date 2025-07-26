@@ -30,6 +30,7 @@ import { FaHeart } from "react-icons/fa";
 import { useGlobalContext } from "./Sidebar";
 import "reactflow/dist/style.css";
 import NodeDetailsModal from "./NodeDetailsModal";
+import { showError, showSuccess, showInfo } from "../utils/ToastUtil";
 
 const nodeTypes = {
   circle: CircleNode,
@@ -70,7 +71,7 @@ const Content = ({ selectedProjectId }) => {
 
   const [newNodeInput, setNewNodeInput] = useState({
     id: "",
-    taskDescription: "",
+    task: "",
     assignedTo: "",
     deadline: "",
     color: "#ffffff",
@@ -228,12 +229,17 @@ const Content = ({ selectedProjectId }) => {
   );
 
   const handleCreateNode = async () => {
+    const task = newNodeInput.task.trim();
+    if (task === "") {
+      showError("Task is mandatory");
+      return;
+    }
     if (!newNodeInput.assignedTo) {
-      alert("Please select a member before creating the node.");
+      showError("Please select a member before creating the node.");
       return;
     }
     if (new Date(newNodeInput.deadline) < new Date()) {
-      alert("Your deadline has passed before creation, please select new deadline");
+      showError("Your deadline has passed before creation, please select new deadline");
       return;
     }
     const newNode = {
@@ -242,7 +248,7 @@ const Content = ({ selectedProjectId }) => {
       type: "circle",
       data: {
         projectId: selectedProjectId,
-        task: newNodeInput.taskDescription,
+        task: newNodeInput.task,
         assignedTo: newNodeInput.assignedTo,
         deadline: newNodeInput.deadline || new Date().toISOString(), // default now
         status: "unpicked",
@@ -259,7 +265,7 @@ const Content = ({ selectedProjectId }) => {
     };
     const updatedNodes = [...nodes, newNode]; // use current state + new node
     setNodes(updatedNodes);
-    setNewNodeInput({ id: "", assignedTo: "", taskDescription: "", deadline: new Date().toISOString(), name: "", color: "#ffffff" });
+    setNewNodeInput({ id: "", assignedTo: "", task: "", deadline: new Date().toISOString(), name: "", color: "#ffffff" });
     await saveGraphNoAlert(updatedNodes, edges);
   };
   const saveGraphNoAlert = async (nodesArg, edgesArg) => {
@@ -289,7 +295,7 @@ const Content = ({ selectedProjectId }) => {
   };
   const saveGraph = async () => {
     await saveGraphNoAlert(nodes, edges);
-    alert("Graph saved!");
+    showError("Graph saved!");
   };
 
   useEffect(() => {
@@ -421,21 +427,26 @@ const Content = ({ selectedProjectId }) => {
               {/* Create Node Section */}
               <div className="flex flex-col space-y-3 ">
                 <div className="flex flex-col space-y-3">
+                  {/* Task Input */}
+                  <label className="text-sm text-gray-600 mb-1 block">Task</label>
                   <input
                     type="text"
-                    placeholder="Task Description"
-                    className="p-[1px] border pl-1 "
+                    placeholder="Enter task"
+                    className="border border-gray-300 rounded-md px-2 py-1 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    maxLength={20}
                     onChange={(e) =>
                       setNewNodeInput((prev) => ({
                         ...prev,
-                        taskDescription: e.target.value,
+                        task: e.target.value,
                       }))
                     }
-                    value={newNodeInput.taskDescription}
+                    value={newNodeInput.task}
                   />
 
+                  {/* Assigned To Dropdown */}
+                  <label className="text-sm text-gray-600 mb-1 block mt-4">Assign To</label>
                   <select
-                    className="p-[1px] border pl-1"
+                    className="border border-gray-300 rounded-md px-2 py-1 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                     value={newNodeInput.assignedTo}
                     onChange={(e) =>
                       setNewNodeInput((prev) => ({
@@ -444,7 +455,7 @@ const Content = ({ selectedProjectId }) => {
                       }))
                     }
                   >
-                    <option value="">Select member</option>
+                    <option value="">Select a member</option>
                     {projectMembers.map((member) => (
                       <option key={member.memberId} value={member.username}>
                         {member.username}
@@ -452,10 +463,10 @@ const Content = ({ selectedProjectId }) => {
                     ))}
                   </select>
 
+                  <label className="text-sm text-gray-600 mb-1 block">Deadline</label>
                   <input
                     type="datetime-local"
-                    placeholder="Deadline"
-                    className="p-[1px] border pl-1"
+                    className="border border-gray-300 rounded-md px-2 py-1 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                     value={newNodeInput.deadline}
                     min={getLocalDateTime()}
                     onChange={(e) => {
@@ -463,8 +474,8 @@ const Content = ({ selectedProjectId }) => {
                       const now = new Date();
 
                       if (selectedTime < now) {
-                        alert("Please select a future date and time.");
-                        return; // don't update state
+                        showError("Please select a future date and time.");
+                        return;
                       }
 
                       setNewNodeInput((prev) => ({
@@ -551,16 +562,16 @@ const Content = ({ selectedProjectId }) => {
                   : node
               )
             );
-            alert("Node marked as completed successfully!");
+            showError("Node marked as completed successfully!");
           } catch (error) {
             // If error response is from backend, show an alert
             if (error.response && error.response.data) {
-              alert(
+              showError(
                 error.response.data.message ||
                 "All todos must be completed before marking as completed."
               );
             } else {
-              alert("Something went wrong. Please try again.");
+              showError("Something went wrong. Please try again.");
             }
           }
         }}

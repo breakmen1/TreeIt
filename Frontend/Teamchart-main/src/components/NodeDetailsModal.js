@@ -1,8 +1,11 @@
 import './../style/NodeDetailsModal.css';
+import { useState } from 'react';
 
 const NodeDetailsModal = ({ show, onClose, nodeName, description, todos, isCompleted, onToggleTodo, onMarkCompleted, onAddTodo, status, onStatusChange, }) => {
+  const [newTodo, setNewTodo] = useState('');
   if (!show) return null;
   console.log("todos-->" + todos);
+  
   return (
     <div className="modal-overlay">
       <div className="modal-card">
@@ -37,19 +40,35 @@ const NodeDetailsModal = ({ show, onClose, nodeName, description, todos, isCompl
           ))}
         </ul>
 
-        <div className="modal-actions">
+        <div className="modal-actions flex flex-col gap-2">
           <input
             type="text"
             placeholder="New task..."
-            onKeyDown={async (e) => {
-              if (e.key === 'Enter') {
-                await onAddTodo(e.target.value);
-                e.target.value = '';
+            value={newTodo}
+            onChange={(e) => setNewTodo(e.target.value)}
+            className="border p-1 rounded"
+          />
+
+          <button
+            onClick={async () => {
+              if (newTodo.trim() !== "") {
+                await onAddTodo(newTodo);
+                setNewTodo('');
               }
             }}
-          />
-          <button onClick={onMarkCompleted}>Mark Node Completed</button>
+            className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
+          >
+            Add Todo
+          </button>
+
+          <button
+            onClick={onMarkCompleted}
+            className="bg-gray-500 text-white px-4 py-1 rounded hover:bg-gray-600"
+          >
+            Mark Node Completed
+          </button>
         </div>
+
       </div>
     </div>
   );

@@ -91,7 +91,7 @@ export default function CircleNode({ data }) {
               </span>
             </div>
             <div className="mt-1">
-              <strong>Remaining:</strong>{" "}
+              <strong>⌛ Remaining:</strong>{" "}
               {data.deadline ? getRemainingTime(data.deadline) : "None"}
             </div>
           </div>
