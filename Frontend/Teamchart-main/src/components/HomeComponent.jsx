@@ -418,7 +418,7 @@ const Content = ({ selectedProjectId }) => {
               <BiSolidDockLeft className="w-5 h-5" />
             </button>
             <h2 className="text-3xl font-semibold text-gray-700 ">
-              Task <span className="-ml-1 text-pink-500 ">It</span>
+              Node <span className="-ml-1 text-pink-500 ">Data</span>
             </h2>
           </div>
           <hr className="my-0 mt-[0.20rem]" />

@@ -16,6 +16,7 @@ function Login({ onLogin }) {
       console.log(res);
       if (res.status === 200 && typeof res.data === "number") {
         localStorage.setItem("memberId", res.data);
+        localStorage.setItem("username", form.username);
         console.log("logged memberId:-" + res.data);
         onLogin(res.data);
         navigate("/home");

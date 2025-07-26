@@ -50,6 +50,10 @@ const Home = () => {
           `/projects/member/${memberId}`
         );
         setProjects(res.data);
+        console.log(projects.length);
+        if (projects.length > 0) {
+          setSelectedProjectId(projects[projects.length - 1].projectId);
+        }
       } catch (err) {
         console.error("Error fetching user projects", err);
       }
@@ -84,12 +88,19 @@ const Home = () => {
       setIsModalOpen(false);
       setNewProjectName("");
       setSelectedMembers([]);
+      setSelectedProjectId(response.data.projectId);
 
     } catch (err) {
       console.error("Select some members first");
       alert("Please select atleast one member before creating project");
     }
   };
+
+  useEffect(() => {
+    if (projects.length > 0 && !selectedProjectId) {
+      setSelectedProjectId(projects[projects.length - 1].projectId);
+    }
+  }, [projects, selectedProjectId]);
 
   const handleSelectProject = (projectId) => {
     setSelectedProjectId(projectId);
@@ -118,7 +129,7 @@ const Home = () => {
         </div>
         <div>
           <h2 className="mt-[0.34rem] text-3xl font-semibold text-gray-700">
-            Team <span className="-ml-1 text-pink-500">Chart</span>
+            TreeIt <span className="-ml-1 text-pink-500">Chart</span>
           </h2>
         </div>
       </div>
