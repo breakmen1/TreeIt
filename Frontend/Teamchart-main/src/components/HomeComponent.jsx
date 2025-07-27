@@ -238,6 +238,7 @@ const Content = ({ selectedProjectId }) => {
       showError("Please select a member before creating the node.");
       return;
     }
+    console.log(new Date(newNodeInput.deadline));
     if (new Date(newNodeInput.deadline) < new Date()) {
       showError("Your deadline has passed before creation, please select new deadline");
       return;
@@ -267,6 +268,7 @@ const Content = ({ selectedProjectId }) => {
     setNodes(updatedNodes);
     setNewNodeInput({ id: "", assignedTo: "", task: "", deadline: new Date().toISOString(), name: "", color: "#ffffff" });
     await saveGraphNoAlert(updatedNodes, edges);
+    showSuccess('node created');
   };
   const saveGraphNoAlert = async (nodesArg, edgesArg) => {
     const formattedNodes = nodesArg.map((node) => ({
@@ -295,7 +297,7 @@ const Content = ({ selectedProjectId }) => {
   };
   const saveGraph = async () => {
     await saveGraphNoAlert(nodes, edges);
-    showError("Graph saved!");
+    showSuccess("Graph saved!");
   };
 
   useEffect(() => {

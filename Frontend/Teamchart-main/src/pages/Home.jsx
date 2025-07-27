@@ -15,6 +15,7 @@ import PageWrapper from "../components/PageWrapper";
 
 
 
+
 const Home = () => {
   const { openSidebar, isSidebarOpen } = useGlobalContext();
   const [projects, setProjects] = useState([]);
@@ -71,7 +72,7 @@ const Home = () => {
   const handleAddProject = async (name) => {
     if (!newProjectName.trim()) {
       setNameError(true);
-      showError("Give any project name");
+      showInfo("Project name is mandatory!");
       return;
     }
     setNameError(false);
@@ -92,8 +93,7 @@ const Home = () => {
       setSelectedProjectId(response.data.projectId);
 
     } catch (err) {
-      console.error("Select some members first");
-      alert("Please select atleast one member before creating project");
+      showInfo("Please select atleast one member before creating project");
     }
   };
 

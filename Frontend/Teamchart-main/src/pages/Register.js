@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import api from '../components/BaseAPI';
-import { Link } from 'react-router-dom';
+import { Link, redirect } from 'react-router-dom';
 import registerImage from '../images/Register.gif'; // adjust path if in another folder
 import "../style/Register.css";
 import PageWrapper from "../components/PageWrapper";
+import { useNavigate } from 'react-router-dom';
+import { showError, showSuccess, showInfo } from "../utils/ToastUtil";
+
 
 
 function Register() {
@@ -14,14 +17,20 @@ function Register() {
     role: 'USER',
   });
   const [message, setMessage] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await api.post('/auth/register', form);
-      setMessage('Registration successful. Please register.');
+      const res = await api.post('/auth/register', form);
+      if (res.data == "Mail already exists" || res.data == "Employee ID already exists" || res.data == "Username already exists") {
+        showInfo(res.data);
+      } else {
+        showSuccess(res.data);
+        navigate('/login');
+      }
     } catch {
-      setMessage('Registration failed. Try a different username.');
+      showError('Registration failed, Srever busy');
     }
   };
 
@@ -42,21 +51,28 @@ function Register() {
           <form className="register-form" onSubmit={handleSubmit}>
             <input
               type="text"
-              placeholder="Name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
+              placeholder="mail"
+              value={form.mail}
+              onChange={(e) => setForm({ ...form, mail: e.target.value })}
               className="register-input"
             />
             <input
               type="text"
-              placeholder="Username"
+              placeholder="employee no"
+              value={form.employeeId}
+              onChange={(e) => setForm({ ...form, employeeId: e.target.value })}
+              className="register-input"
+            />
+            <input
+              type="text"
+              placeholder="username"
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
               className="register-input"
             />
             <input
               type="password"
-              placeholder="Password"
+              placeholder="password"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               className="register-input"

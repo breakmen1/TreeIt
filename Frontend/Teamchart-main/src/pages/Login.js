@@ -5,7 +5,7 @@ import "../style/Login.css";
 import loginImage from '../images/Login.gif';
 import Loading from "../components/Loading";
 import PageWrapper from "../components/PageWrapper";
-
+import { showError, showSuccess, showInfo } from "../utils/ToastUtil";
 
 function Login({ onLogin }) {
   const [form, setForm] = useState({ username: "", password: "" });
@@ -22,15 +22,16 @@ function Login({ onLogin }) {
         localStorage.setItem("memberId", res.data);
         localStorage.setItem("username", form.username);
         onLogin(res.data);
+        showSuccess('Logged in as ' + form.username);
         navigate("/home");
       } else {
-        setError("Unexpected response from server.");
+        showError("Unexpected response from server.");
       }
     } catch (err) {
       if (err.response?.status === 401) {
-        setError("Invalid username or password");
+        showError("Invalid username or password");
       } else {
-        setError("Login failed. Please try again.");
+        showError("Login failed. Please try again.");
       }
     } finally {
       setIsLoading(false);
