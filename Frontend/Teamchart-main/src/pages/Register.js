@@ -1,62 +1,84 @@
 import React, { useState } from 'react';
 import api from '../components/BaseAPI';
-import { Link } from 'react-router-dom'; // ✅ import
+import { Link } from 'react-router-dom';
+import registerImage from '../images/Register.gif'; // adjust path if in another folder
+import "../style/Register.css";
 
 function Register() {
-  const [form, setForm] = useState({ username: '', password: '', name: '', role: 'USER' });
+  const [form, setForm] = useState({
+    username: '',
+    password: '',
+    name: '',
+    role: 'USER',
+  });
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await api.post('/auth/register', form);
-      setMessage('Registration successful. Please login.');
+      setMessage('Registration successful. Please register.');
     } catch {
       setMessage('Registration failed. Try a different username.');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-md w-[300px] mx-auto mt-20 space-y-4">
-      <h2 className="text-2xl font-bold mb-4 text-center">Register</h2>
+    <div className="register-wrapper">
+      <div className="register-right">
+        <img src={registerImage} alt="register Visual" className="register-image" />
 
-      <input
-        placeholder="Name"
-        onChange={e => setForm({ ...form, name: e.target.value })}
-        className="w-full p-2 border rounded"
-      />
-      <input
-        placeholder="Username"
-        onChange={e => setForm({ ...form, username: e.target.value })}
-        className="w-full p-2 border rounded"
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        onChange={e => setForm({ ...form, password: e.target.value })}
-        className="w-full p-2 border rounded"
-      />
-      <select
-        onChange={e => setForm({ ...form, role: e.target.value })}
-        className="w-full p-2 border rounded"
-      >
-        <option value="USER">User</option>
-        <option value="ADMIN">Admin</option>
-      </select>
 
-      <button type="submit" className="w-full p-2 bg-blue-600 text-white rounded hover:bg-blue-700">
-        Register
-      </button>
+        <h3>Break It! <b>To Build It</b></h3>
+        <p>Visual task management tool</p>
+      </div>
+      <div className="register-left">
+        <div className="register-logo">Tree It</div>
+        <h2 className="register-welcome">Hello there!</h2>
+        <p className="register-subtext">Please enter your register details below</p>
+        <form className="register-form" onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Name"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            className="register-input"
+          />
+          <input
+            type="text"
+            placeholder="Username"
+            value={form.username}
+            onChange={(e) => setForm({ ...form, username: e.target.value })}
+            className="register-input"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={form.password}
+            onChange={(e) => setForm({ ...form, password: e.target.value })}
+            className="register-input"
+          />
+          <select
+            onChange={e => setForm({ ...form, role: e.target.value })}
+            className="register-select"
+          >
+            <option value="USER">User</option>
+            <option value="ADMIN">Admin</option>
+          </select>
 
-      <p className="text-sm text-gray-600">
-        Already have an account?{' '}
-        <Link to="/login" className="text-blue-500 hover:underline">
-          Login here
-        </Link>
-      </p>
+          <button className="register-button" type="submit">
+            register
+          </button>
+          {message && <p className="register-message">{message}</p>}
 
-      {message && <p className="text-center text-sm mt-2">{message}</p>}
-    </form>
+          <p className="signup-prompt">
+            Already have an account? <a href="/login">Sign In</a>
+          </p>
+        </form>
+      </div>
+
+
+    </div>
   );
 }
 
