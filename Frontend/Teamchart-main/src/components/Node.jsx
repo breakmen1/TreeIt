@@ -87,7 +87,7 @@ export default function CircleNode({ data }) {
               transform: "translate(-50%, -100%)",
             }}
           >
-            <div className="bg-black bg-opacity-90 text-white text-xs rounded-lg px-4 py-3 shadow-lg animate-fadeIn max-w-xs w-[240px] whitespace-normal text-left">
+            <div className="bg-white bg-opacity-90 text-black text-xs rounded-lg px-4 py-3 shadow-lg animate-fadeIn max-w-xs w-[240px] whitespace-normal text-left">
               <div className="flex items-start gap-2 mb-1">
                 <FaTasks className="mt-[2px] text-yellow-400" />
                 <span><strong>Task:</strong> {data.task}</span>
@@ -97,7 +97,7 @@ export default function CircleNode({ data }) {
                 <span><strong>Assigned:</strong> {data.assignedTo}</span>
               </div>
               <div className="flex items-start gap-2 mb-1">
-                <span><strong>⌛ Remaining:</strong>{data.deadline ? getRemainingTime(data.deadline) : "None"}</span>
+                <span><strong>⌛ Remaining : </strong>{data.deadline ? getRemainingTime(data.deadline) : "None"}</span>
               </div>
             </div>
           </div>,
