@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Handle, Position } from "reactflow";
 import { FaTasks, FaUser } from "react-icons/fa";
+import ReactDOM from "react-dom";
+
 
 export default function CircleNode({ data }) {
   const nodeRef = useRef(null);
@@ -12,25 +14,22 @@ export default function CircleNode({ data }) {
     const now = new Date();
     const end = new Date(deadline);
     const diff = end - now;
-
     if (diff <= 0) return "Past due";
-
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
     const min = Math.floor((diff / (1000 * 60)) % 60);
-
     return ` ${days}d ${hours}h ${min}m `;
   };
 
   const handleMouseEnter = () => {
-    clearTimeout(timeoutRef.current); // prevent early hide
+    clearTimeout(timeoutRef.current);
     setIsHovered(true);
   };
 
   const handleMouseLeave = () => {
     timeoutRef.current = setTimeout(() => {
       setIsHovered(false);
-    }, 500); // ⏱ keep tooltip for 3 seconds
+    }, 500);
   };
 
   useEffect(() => {
@@ -50,6 +49,17 @@ export default function CircleNode({ data }) {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
+  // Status-based gradient colors
+  const statusGradient = {
+    completed: "from-green-400 to-green-600",
+    pending: "from-blue-400 to-blue-600",
+    stuck: "from-red-400 to-red-600",
+    default: "from-gray-300 to-gray-500",
+  };
+
+  const gradient =
+    statusGradient[data.status] || statusGradient.default;
+
   return (
     <div
       className="relative"
@@ -58,45 +68,41 @@ export default function CircleNode({ data }) {
     >
       <div
         ref={nodeRef}
-        className="flex items-center justify-center w-[60px] h-[60px] rounded-full"
-        style={{
-          backgroundColor:
-            data.status === "completed"
-              ? "#4ade80" // green
-              : data.status === "pending"
-                ? "#60a5fa" // blue
-                : data.status === "stuck"
-                  ? "#f87171" // red
-                  : "#e5e7eb",
-          border: "2px solid #9ca3af",
-        }}
+        className={`w-[60px] h-[60px] rounded-full bg-gradient-to-br ${gradient} 
+          shadow-xl border-2 border-gray-300 flex items-center justify-center 
+          transition-transform duration-300 hover:scale-110`}
       >
         <Handle type="target" position={Position.Left} />
         <Handle type="source" position={Position.Right} />
       </div>
 
-      {isHovered && (
-        <div className="absolute top-[-80px] left-1/2 transform -translate-x-1/2 z-50">
-          <div className="px-3 py-2 bg-black text-white text-xs rounded-md shadow-md whitespace-nowrap">
-            <div className="flex items-start gap-2 mb-1">
-              <FaTasks className="mt-[2px] text-yellow-400" />
-              <span>
-                <strong>Task:</strong> {data.task}
-              </span>
+      {isHovered &&
+        hoverPos &&
+        ReactDOM.createPortal(
+          <div
+            className="fixed z-[9999] pointer-events-none"
+            style={{
+              top: `${hoverPos.top + 78}px`,
+              left: `${hoverPos.left + 135}px`,
+              transform: "translate(-50%, -100%)",
+            }}
+          >
+            <div className="bg-black bg-opacity-90 text-white text-xs rounded-lg px-4 py-3 shadow-lg animate-fadeIn max-w-xs w-[240px] whitespace-normal text-left">
+              <div className="flex items-start gap-2 mb-1">
+                <FaTasks className="mt-[2px] text-yellow-400" />
+                <span><strong>Task:</strong> {data.task}</span>
+              </div>
+              <div className="flex items-start gap-2 mb-1">
+                <FaUser className="mt-[2px] text-green-400" />
+                <span><strong>Assigned:</strong> {data.assignedTo}</span>
+              </div>
+              <div className="flex items-start gap-2 mb-1">
+                <span><strong>⌛ Remaining:</strong>{data.deadline ? getRemainingTime(data.deadline) : "None"}</span>
+              </div>
             </div>
-            <div className="flex items-start gap-2">
-              <FaUser className="mt-[2px] text-green-400" />
-              <span>
-                <strong>Assigned:</strong> {data.assignedTo}
-              </span>
-            </div>
-            <div className="mt-1">
-              <strong>⌛ Remaining:</strong>{" "}
-              {data.deadline ? getRemainingTime(data.deadline) : "None"}
-            </div>
-          </div>
-        </div>
-      )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

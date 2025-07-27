@@ -2,6 +2,15 @@ body {
   margin: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: #f0f2f5;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  /* For Firefox */
+}
+
+body::-webkit-scrollbar {
+  width: 0px;
+  /* For Chrome, Safari */
+  background: transparent;
 }
 
 .login-wrapper {
@@ -29,8 +38,8 @@ body {
   justify-content: center;
   padding: 3rem;
   text-align: center;
-  border-top-left-radius: 40px;
-  border-bottom-left-radius: 40px;
+  border-top-right-radius: 40px;
+  border-bottom-right-radius: 40px;
 }
 
 .login-image {

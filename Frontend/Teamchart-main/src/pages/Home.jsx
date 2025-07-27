@@ -11,6 +11,7 @@ import {
   showSuccessAlert,
   showConfirmAlert,
 } from '../utils/SweetAlertUtil';
+import PageWrapper from "../components/PageWrapper";
 
 
 
@@ -107,98 +108,100 @@ const Home = () => {
   };
 
   return (
-    <div>
-      {/* Sidebar */}
-      <LeftSidebar
-        projects={projects}
-        onAddProject={openCreateModal}
-        onSelectProject={handleSelectProject}
-        selectedProjectId={selectedProjectId}
-      />
+    <PageWrapper>
+      <div>
+        {/* Sidebar */}
+        <LeftSidebar
+          projects={projects}
+          onAddProject={openCreateModal}
+          onSelectProject={handleSelectProject}
+          selectedProjectId={selectedProjectId}
+        />
 
-      {/* NavBar */}
-      <div className="flex flex-row w-full gap-10 pb-4 shadow-sm p-[13px] ml-64">
-        <div>
-          <button
-            onClick={openSidebar}
-            className={`${isSidebarOpen ? "translate-x-8" : "translate-x-0"
-              } fixed top-4 right-4 transition transform ease-linear duration-500 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center active:bg-gray-300 focus:outline-none hover:bg-gray-200 hover:text-gray-800`}
-          >
-            <FaBars className="w-5 h-5" />
-          </button>
-        </div>
-        <div>
-          <h2 className="mt-[0.34rem] text-3xl font-semibold text-gray-700">
-            TreeIt <span className="-ml-1 text-pink-500">Chart</span>
-          </h2>
-        </div>
-      </div>
-
-      {/* Flow */}
-      <div className="ml-64">
-        <ReactFlowProviderContent selectedProjectId={selectedProjectId} />
-      </div>
-
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded shadow w-96">
-            <h2 className="text-xl font-bold mb-4">Create New Project</h2>
-
-            <input
-              type="text"
-              placeholder="Project Name"
-              value={newProjectName}
-              onChange={(e) => {
-                setNewProjectName(e.target.value);
-                if (nameError) setNameError(false); // clear error on typing
-              }}
-              className={`w-full mb-1 border px-3 py-2 ${nameError ? "border-red-500" : "border-gray-300"
-                }`}
-            />
-            {nameError && (
-              <p className="text-red-500 text-sm mb-3">Project name is required.</p>
-            )}
-
-            <div className="max-h-40 overflow-y-auto border p-2 mb-4">
-              {allMembers.filter((member) => member.memberId != localStorage.getItem("memberId")).map((member) => (
-                <label key={member.memberId} className="block mb-1 text-sm">
-                  <input
-                    type="checkbox"
-                    value={member.memberId}
-                    checked={selectedMembers.includes(member.memberId)}
-                    onChange={(e) => {
-                      const memberId = member.memberId;
-                      setSelectedMembers((prev) =>
-                        prev.includes(memberId)
-                          ? prev.filter((uid) => uid !== memberId)
-                          : [...prev, memberId]
-                      );
-                    }}
-                    className="mr-2"
-                  />
-                  {member.username}
-                </label>
-              ))}
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <button
-                className="px-4 py-2 bg-gray-300 rounded"
-                onClick={() => setIsModalOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-blue-600 text-white rounded"
-                onClick={() => handleAddProject(newProjectName)}
-              >
-                Create
-              </button>
-            </div>
+        {/* NavBar */}
+        <div className="flex flex-row w-full gap-10 pb-4 shadow-sm p-[13px] ml-64">
+          <div>
+            <button
+              onClick={openSidebar}
+              className={`${isSidebarOpen ? "translate-x-8" : "translate-x-0"
+                } fixed top-4 right-4 transition transform ease-linear duration-500 text-gray-600 w-8 h-8 rounded-full flex items-center justify-center active:bg-gray-300 focus:outline-none hover:bg-gray-200 hover:text-gray-800`}
+            >
+              <FaBars className="w-5 h-5" />
+            </button>
+          </div>
+          <div>
+            <h2 className="mt-[0.34rem] text-3xl font-semibold text-gray-700">
+              TreeIt <span className="-ml-1 text-pink-500">Chart</span>
+            </h2>
           </div>
         </div>
-      )}
-    </div>
+
+        {/* Flow */}
+        <div className="ml-64">
+          <ReactFlowProviderContent selectedProjectId={selectedProjectId} />
+        </div>
+
+        {isModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded shadow w-96">
+              <h2 className="text-xl font-bold mb-4">Create New Project</h2>
+
+              <input
+                type="text"
+                placeholder="Project Name"
+                value={newProjectName}
+                onChange={(e) => {
+                  setNewProjectName(e.target.value);
+                  if (nameError) setNameError(false); // clear error on typing
+                }}
+                className={`w-full mb-1 border px-3 py-2 ${nameError ? "border-red-500" : "border-gray-300"
+                  }`}
+              />
+              {nameError && (
+                <p className="text-red-500 text-sm mb-3">Project name is required.</p>
+              )}
+
+              <div className="max-h-40 overflow-y-auto border p-2 mb-4">
+                {allMembers.filter((member) => member.memberId != localStorage.getItem("memberId")).map((member) => (
+                  <label key={member.memberId} className="block mb-1 text-sm">
+                    <input
+                      type="checkbox"
+                      value={member.memberId}
+                      checked={selectedMembers.includes(member.memberId)}
+                      onChange={(e) => {
+                        const memberId = member.memberId;
+                        setSelectedMembers((prev) =>
+                          prev.includes(memberId)
+                            ? prev.filter((uid) => uid !== memberId)
+                            : [...prev, memberId]
+                        );
+                      }}
+                      className="mr-2"
+                    />
+                    {member.username}
+                  </label>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <button
+                  className="px-4 py-2 bg-gray-300 rounded"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-4 py-2 bg-blue-600 text-white rounded"
+                  onClick={() => handleAddProject(newProjectName)}
+                >
+                  Create
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </PageWrapper>
   );
 };
 

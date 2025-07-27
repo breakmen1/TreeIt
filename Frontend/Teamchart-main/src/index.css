@@ -3,6 +3,15 @@ body {
   font-family: 'Segoe UI';
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  /* For Firefox */
+}
+
+body::-webkit-scrollbar {
+  width: 0px;
+  /* For Chrome, Safari */
+  background: transparent;
 }
 
 code {
@@ -19,7 +28,7 @@ code {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   z-index: 1000;
 }
 
@@ -29,7 +38,8 @@ code {
   left: 50%;
   transform: translate(-50%, -50%);
   background: white;
-  z-index: 1001; /* higher than overlay */
+  z-index: 1001;
+  /* higher than overlay */
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 8px;
 }
