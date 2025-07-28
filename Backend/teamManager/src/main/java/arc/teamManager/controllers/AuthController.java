@@ -45,14 +45,20 @@ public class AuthController {
 
             return ResponseEntity.ok(member.getMemberId()); // Return memberId or a token
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid mail or username or password");
         }
     }
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Member member) {
-        if (memberService.userExists(member.getUsername())) {
-            return ResponseEntity.badRequest().body("Username already exists");
+        if (memberService.mailExists(member.getMail())) {
+            return ResponseEntity.ok().body("Mail already exists");
+        }
+        if (memberService.employeeIdExists(member.getEmployeeId())) {
+            return ResponseEntity.ok().body("Employee ID already exists");
+        }
+        if (memberService.usernameExists(member.getUsername())) {
+            return ResponseEntity.ok().body("Username already exists");
         }
         member.setPassword(passwordEncoder.encode(member.getPassword()));
         Member savedMember = memberRepository.save(member);

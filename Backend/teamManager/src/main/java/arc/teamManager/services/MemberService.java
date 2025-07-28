@@ -20,7 +20,15 @@ public class MemberService {
         return memberRepository.save(member);
     }
 
-    public boolean userExists(String username) {
+    public boolean usernameExists(String username) {
         return memberRepository.findByUsername(username).isPresent();
+    }
+
+    public boolean mailExists(String mail) {
+        return memberRepository.findByMail(mail).isPresent();
+    }
+
+    public boolean employeeIdExists(String employeeId) {
+        return memberRepository.findByEmployeeId(employeeId).isPresent();
     }
 }

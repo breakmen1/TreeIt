@@ -29,8 +29,11 @@ public class Member {
     @Column(name = "USERNAME", unique = true, nullable = false)
     private String username;
 
-    @Column(name = "NAME", nullable = false)
-    private String name;
+    @Column(name = "EMAIL", nullable = false)
+    private String mail;
+
+	@Column(name = "EMPLOYEE_ID", nullable = false)
+    private String employeeId;
 
     @Column(name = "PASSWORD", nullable = false)
     private String password;
@@ -42,6 +45,7 @@ public class Member {
     @JsonIgnore
     private List<Project> projects;
 
+	
 	public Long getMemberId() {
 		return memberId;
 	}
@@ -56,14 +60,6 @@ public class Member {
 
 	public void setUsername(String username) {
 		this.username = username;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
 	}
 
 	public String getPassword() {
