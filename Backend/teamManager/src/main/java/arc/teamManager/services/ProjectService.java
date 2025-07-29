@@ -43,4 +43,21 @@ public class ProjectService {
         // Use JPA to fetch all projects where the member is in the list
         return projectRepository.findProjectsVisibleToMember(member);
     }
+
+    public void addMembersToProject(Long projectId, List<Long> memberIds) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+
+        List<Member> users = memberRepository.findAllById(memberIds);
+        project.getMembers().addAll(users);
+        projectRepository.save(project);
+    }
+
+    public void deleteProject(Long projectId) {
+        if (!projectRepository.existsById(projectId)) {
+            throw new RuntimeException("Project not found");
+        }
+        projectRepository.deleteById(projectId);
+    }
+
 }

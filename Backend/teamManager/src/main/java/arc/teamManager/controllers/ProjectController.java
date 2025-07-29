@@ -6,14 +6,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import arc.teamManager.dto.MemberDTO;
+import arc.teamManager.dto.MemberIdsRequest;
 import arc.teamManager.dto.ProjectDTO;
 import arc.teamManager.entities.Member;
 import arc.teamManager.entities.Project;
@@ -60,6 +63,21 @@ public class ProjectController {
 
         Project savedProject = projectRepository.save(project);
         return savedProject;
+    }
+
+    @PutMapping("/{projectId}/add-members")
+    public ResponseEntity<?> addMembersToProject(
+            @PathVariable Long projectId,
+            @RequestBody MemberIdsRequest request) {
+        List<Long> memberIds = request.getMemberIds();
+        projectService.addMembersToProject(projectId, memberIds);
+        return ResponseEntity.ok("Members added successfully");
+    }
+
+    @DeleteMapping("/{projectId}")
+    public ResponseEntity<?> deleteProject(@PathVariable Long projectId) {
+        projectService.deleteProject(projectId);
+        return ResponseEntity.ok("Project deleted");
     }
 
 }

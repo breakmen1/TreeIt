@@ -83,6 +83,7 @@ const Content = ({ selectedProjectId }) => {
 
       try {
         const res = await api.get(`/projects/${selectedProjectId}/members`);
+        console.log("project refetch happened")
         setProjectMembers(res.data);
       } catch (err) {
         console.error("Failed to fetch project members:", err);
@@ -91,6 +92,7 @@ const Content = ({ selectedProjectId }) => {
 
     fetchProjectMembers();
   }, [selectedProjectId]);
+  
   const filteredNodes = useMemo(() => {
     return nodes.filter(
       (node) => `${node.data.projectId}` == `${selectedProjectId}`

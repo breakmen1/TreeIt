@@ -1,28 +1,104 @@
 import React, { useState, useEffect } from "react";
-
+import api from "./BaseAPI";
 const LeftSidebar = ({
   projects = [],
   onAddProject,
   onSelectProject,
   selectedProjectId,
+  setSelectedProjectId
 }) => {
   const username = localStorage.getItem("username") || "User";
   const avatarKey = `avatar-${username}`;
-
   const defaultAvatar = `https://api.dicebear.com/7.x/initials/svg?seed=${username}&backgroundType=gradientLinear&fontFamily=Trebuchet%20MS&fontSize=41`;
 
   const [isProjectOpen, setIsProjectOpen] = useState(true);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [avatar, setAvatar] = useState(defaultAvatar);
+  const [menuOpenId, setMenuOpenId] = useState(null); // which project’s menu open
+  const [candidateMembers, setCandidateMembers] = useState([]);
+  const [selectedCandidates, setSelectedCandidates] = useState([]);
 
+  const [allMembers, setAllMembers] = useState([]);
+  const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
+  const [modalProject, setModalProject] = useState(null);
+
+  // ⬇️ Fetch all members when Add Members modal is opened
   useEffect(() => {
-    localStorage.setItem(avatarKey, avatar);
-  }, [avatar, avatarKey]);
+    const fetchAllMembers = async () => {
+      try {
+        const res = await api.get(`/members`);
+        setAllMembers(res.data);
+      } catch (error) {
+        console.error("Error fetching members:", error);
+        setAllMembers([]);
+      }
+    };
 
+    if (modalProject) fetchAllMembers();
+  }, [modalProject]);
+
+  const availableCandidates = allMembers.filter(
+    (member) => !modalProject?.members?.some((m) => m._id === member._id)
+  );
+
+
+  // Toggle menu visibility
+  const toggleMenu = (pid) =>
+    setMenuOpenId((prev) => (prev === pid ? null : pid));
+
+  const onSelectProjectClick = (pid) => {
+    onSelectProject(pid);
+    setMenuOpenId(null);
+  };
+
+  const openAddMemberModal = async (project) => {
+    setModalProject(project);
+
+    const res = await api.get(`/projects/${selectedProjectId}/members`);
+
+    // compute candidates not in project
+    const currentIds = res.data?.map((m) => m.memberId) || [];
+    const candidates = allMembers.filter(
+      (m) => !currentIds.includes(m.memberId)
+    );
+    setCandidateMembers(candidates);
+    setSelectedCandidates([]); // initially none selected
+    setMenuOpenId(null);
+  };
+
+  const handleUpdateMembers = async () => {
+    if (!modalProject) return;
+    try {
+      await api.put(`/projects/${modalProject.projectId}/add-members`, {
+        memberIds: selectedCandidates,
+      });
+      alert("Members updated successfully");
+      setSelectedProjectId(null); // temporarily unset
+      setTimeout(() => setSelectedProjectId(modalProject.projectId), 0); // then reset
+      setModalProject(null);
+      // optionally trigger parent to refetch or update projects array
+    } catch (err) {
+      console.error(err);
+      alert("Error updating members");
+    }
+  };
+
+  const handleDeleteProject = async (projectId) => {
+    if (!window.confirm("Are you sure you want to delete this project?"))
+      return;
+    try {
+      await api.delete(`/projects/${projectId}`);
+      alert("Deleted");
+      window.location.reload();
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting project");
+    }
+  };
   return (
     <>
       <div className="w-64 h-screen bg-gray-100 border-r px-4 py-6 fixed top-0 left-0">
-        {/* User Profile Section */}
+        {/* User Profile */}
         <div className="flex items-center justify-between mb-4">
           <div
             className="flex items-center gap-3 cursor-pointer"
@@ -40,45 +116,114 @@ const LeftSidebar = ({
         {/* Folder toggle */}
         <div className="flex justify-between items-center mb-2 cursor-pointer">
           <p
-            className="text-md font-medium text-gray-700 hover:text-blue-600 transition"
+            className="text-md font-semibold text-gray-700 hover:text-blue-600 transition"
             onClick={() => setIsProjectOpen((prev) => !prev)}
           >
-            {isProjectOpen ? "📂 projects" : "📁 open projects"}
+            {isProjectOpen ? "📂 Projects" : "📁 Open Projects"}
           </p>
         </div>
 
-        {/* Projects List with Transition */}
+        {/* Projects list with transition */}
         <div
-          className={`flex flex-col gap-2 mb-4 transition-all duration-300 ease-in-out overflow-hidden ${
-            isProjectOpen ? "max-h-[500px]" : "max-h-0"
-          }`}
+          className={`transition-all duration-300 ease-in-out overflow-hidden ${isProjectOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
+            }`}
         >
-          {projects.map((project, index) => {
+          {projects.map((project) => {
             const isSelected = project.projectId === selectedProjectId;
             return (
-              <button
-                key={index}
-                onClick={() => onSelectProject(project.projectId)}
-                className={`text-left px-3 py-2 rounded shadow transition ${
-                  isSelected
-                    ? "bg-blue-500 text-white"
-                    : "bg-white hover:bg-gray-200 text-black"
-                }`}
+              <div
+                key={project.projectId}
+                className={`mb-3 shadow-sm rounded ${isSelected ? "bg-blue-400" : "bg-gray-50"} transition`}
               >
-                {project.name}
-              </button>
+                <div className="flex justify-between items-center px-3 py-2 rounded hover:bg-white-400">
+                  <button
+                    onClick={() => onSelectProjectClick(project.projectId)}
+                    className="text-left w-full font-medium text-gray-800"
+                  >
+                    {project.name}
+                  </button>
+                  <button
+                    className="ml-2 px-1 py-1 hover:bg-gray-200 rounded text-lg"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleMenu(project.projectId);
+                    }}
+                  >
+                    ⋮
+                  </button>
+                </div>
+
+                {menuOpenId === project.projectId && (
+                  <div className="pl-4 pb-2 text-sm text-gray-700 animate-fadeIn">
+                    <button
+                      className="block w-full text-left py-1 hover:bg-gray-100 rounded"
+                      onClick={() => openAddMemberModal(project)}
+                    >
+                      ➕ Add Members
+                    </button>
+                    <button
+                      className="block w-full text-left py-1 text-red-600 hover:bg-red-50 rounded"
+                      onClick={() => handleDeleteProject(project.projectId)}
+                    >
+                      🗑 Delete Project
+                    </button>
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
 
-        {/* Create Project Button */}
+        {/* Create project button */}
         <button
           onClick={onAddProject}
-          className="bg-blue-600 text-white px-2 py-1 text-sm rounded hover:bg-blue-700"
+          className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded shadow transition"
         >
           Create Project
         </button>
+
+
       </div>
+      {/* Add Members Modal */}
+      {modalProject && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-80">
+            <h3 className="text-xl mb-4">Add Members to {modalProject.name}</h3>
+            <div className="max-h-48 overflow-y-auto mb-4">
+              {candidateMembers.map((m) => (
+                <label key={m.memberId} className="block mb-1">
+                  <input
+                    type="checkbox"
+                    value={m.memberId}
+                    onChange={(e) => {
+                      const id = m.memberId;
+                      setSelectedCandidates((prev) =>
+                        e.target.checked
+                          ? [...prev, id]
+                          : prev.filter((x) => x !== id)
+                      );
+                    }}
+                  />{" "}
+                  {m.username}
+                </label>
+              ))}
+            </div>
+            <div className="text-right space-x-2">
+              <button onClick={() => setModalProject(null)} className="px-3 py-1">
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateMembers}
+                disabled={selectedCandidates.length === 0}
+                className="px-4 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
+              >
+                Update Members
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Profile Modal */}
       {isProfileModalOpen && (
@@ -131,5 +276,4 @@ const LeftSidebar = ({
     </>
   );
 };
-
 export default LeftSidebar;

@@ -25,6 +25,7 @@ const Home = () => {
   const [newProjectName, setNewProjectName] = useState("");
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [nameError, setNameError] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const fetchAllMembers = async () => {
     try {
@@ -116,6 +117,7 @@ const Home = () => {
           onAddProject={openCreateModal}
           onSelectProject={handleSelectProject}
           selectedProjectId={selectedProjectId}
+          setSelectedProjectId={setSelectedProjectId}
         />
 
         {/* NavBar */}
@@ -138,7 +140,9 @@ const Home = () => {
 
         {/* Flow */}
         <div className="ml-64">
-          <ReactFlowProviderContent selectedProjectId={selectedProjectId} />
+          <ReactFlowProviderContent
+            selectedProjectId={selectedProjectId}
+          />
         </div>
 
         {isModalOpen && (
