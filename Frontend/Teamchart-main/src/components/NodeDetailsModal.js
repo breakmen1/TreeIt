@@ -1,76 +1,106 @@
 import './../style/NodeDetailsModal.css';
 import { useState } from 'react';
+import { showError, showSuccess, showInfo } from "../utils/ToastUtil";
 
-const NodeDetailsModal = ({ show, onClose, nodeName, description, todos, isCompleted, onToggleTodo, onMarkCompleted, onAddTodo, status, onStatusChange, }) => {
+const NodeDetailsModal = ({ show, onClose, nodeName, description, todos, isCompleted, assignedTo, creatorId, onToggleTodo, onMarkCompleted, onAddTodo, status, onStatusChange, }) => {
   const [newTodo, setNewTodo] = useState('');
   if (!show) return null;
-  console.log("todos-->" + todos);
-  
-  return (
-    <div className="modal-overlay">
-      <div className="modal-card">
-        <button className="close-button" onClick={onClose}>×</button>
+  const loggedInMember = localStorage.getItem("username");
+  const loggedInMemberId = localStorage.getItem("memberId");
 
-        <h2 className="modal-title">{nodeName}</h2>
-        <p className="modal-description">{description}</p>
-        <div className="mt-1">
-          <label>
-            <strong>Status:</strong>
+  console.log(creatorId + " " + loggedInMemberId);
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
+      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative animate-fade-in">
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition"
+        >
+          ×
+        </button>
+
+        {/* Title & Description */}
+        <h2 className="text-2xl font-semibold text-gray-800 mb-1">{nodeName}</h2>
+        <p className="text-sm text-gray-600 mb-4">{description}</p>
+
+        {/* Status Dropdown */}
+        {assignedTo === loggedInMember && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Status
+            </label>
             <select
-              className="ml-1 text-black rounded"
               value={status}
               onChange={(e) => onStatusChange(e.target.value)}
+              className="w-full rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 p-2 text-sm"
             >
               <option value="">None</option>
               <option value="pending">Pending</option>
               <option value="stuck">Stuck</option>
             </select>
-          </label>
-        </div>
-        <ul className="todo-list">
-          {todos.map(todo => (
-            <li key={todo.id}>
+          </div>
+        )}
+
+        {/* Todo List */}
+        <ul className="space-y-2 mb-4 max-h-40 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300">
+          {todos.map((todo) => (
+            <li key={todo.id} className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
                 checked={todo.completed}
-                onChange={() => onToggleTodo(todo.id)}
+                onChange={() => {
+                  if (assignedTo === loggedInMember) {
+                    onToggleTodo(todo.id);
+                  } else {
+                    showError("You are not assigned to this task.");
+                  }
+                }}
+                className="accent-blue-500 w-4 h-4"
               />
-              {todo.task}
+              <span className={todo.completed ? "line-through text-gray-500" : ""}>
+                {todo.task}
+              </span>
             </li>
           ))}
         </ul>
 
-        <div className="modal-actions flex flex-col gap-2">
-          <input
-            type="text"
-            placeholder="New task..."
-            value={newTodo}
-            onChange={(e) => setNewTodo(e.target.value)}
-            className="border p-1 rounded"
-          />
+        {/* Add Todo Section (only for creator) */}
+        {creatorId === loggedInMemberId && (
+          <div className="flex flex-col gap-2 mb-4">
+            <input
+              type="text"
+              placeholder="New task..."
+              value={newTodo}
+              onChange={(e) => setNewTodo(e.target.value)}
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={async () => {
+                if (newTodo.trim() !== "") {
+                  await onAddTodo(newTodo);
+                  setNewTodo("");
+                }
+              }}
+              className="bg-blue-600 text-white text-sm py-2 rounded hover:bg-blue-700 transition"
+            >
+              Add Todo
+            </button>
+          </div>
+        )}
 
-          <button
-            onClick={async () => {
-              if (newTodo.trim() !== "") {
-                await onAddTodo(newTodo);
-                setNewTodo('');
-              }
-            }}
-            className="bg-blue-500 text-white px-4 py-1 rounded hover:bg-blue-600"
-          >
-            Add Todo
-          </button>
-
+        {/* Mark Complete Button (only for assigned user) */}
+        {assignedTo === loggedInMember && (
           <button
             onClick={onMarkCompleted}
-            className="bg-gray-500 text-white px-4 py-1 rounded hover:bg-gray-600"
+            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
           >
-            Mark Node Completed
+            Mark Node as Completed
           </button>
-        </div>
-
+        )}
       </div>
     </div>
+
   );
 };
 

@@ -92,7 +92,7 @@ const Content = ({ selectedProjectId }) => {
 
     fetchProjectMembers();
   }, [selectedProjectId]);
-  
+
   const filteredNodes = useMemo(() => {
     return nodes.filter(
       (node) => `${node.data.projectId}` == `${selectedProjectId}`
@@ -245,6 +245,9 @@ const Content = ({ selectedProjectId }) => {
       showError("Your deadline has passed before creation, please select new deadline");
       return;
     }
+
+    const memberId = localStorage.getItem("memberId");
+
     const newNode = {
       id: uuidv4(),
       position: { x: 100, y: 100 },
@@ -253,6 +256,7 @@ const Content = ({ selectedProjectId }) => {
         projectId: selectedProjectId,
         task: newNodeInput.task,
         assignedTo: newNodeInput.assignedTo,
+        creatorId: memberId,
         deadline: newNodeInput.deadline || new Date().toISOString(), // default now
         status: "unpicked",
         onStatusChange: (newStatus) => {
@@ -278,6 +282,7 @@ const Content = ({ selectedProjectId }) => {
       projectId: node.data.projectId,
       task: node.data.task,
       assignedTo: node.data.assignedTo,
+      creatorId: node.data.creatorId,
       assignedAt: new Date().toISOString(), // if needed
       deadline: node.data.deadline,
       status: node.data.status,
@@ -317,6 +322,7 @@ const Content = ({ selectedProjectId }) => {
             projectId: node.projectId,
             task: node.task,
             assignedTo: node.assignedTo,
+            creatorId: node.creatorId,
             deadline: node.deadline,
             status: node.status,
           },
@@ -548,6 +554,8 @@ const Content = ({ selectedProjectId }) => {
         description={nodeDescription}
         todos={todos}
         isCompleted={isCompleted}
+        assignedTo={selectedNode?.data.assignedTo}
+        creatorId={selectedNode?.data.creatorId}
         onToggleTodo={async (todoId) => {
           await api.post(`/todos/${todoId}/toggle`);
           const res = await api.get(`/nodes/${nodeId}/todos`);
@@ -592,7 +600,19 @@ const Content = ({ selectedProjectId }) => {
         onStatusChange={(newStatus) => {
           if (!nodeId) return;
 
-          // Update node color
+          const currentUsername = localStorage.getItem("username");
+          const node = nodes.find((n) => n.id === nodeId);
+
+          if (!node) {
+            showError("Node not found.");
+            return;
+          }
+
+          if (node.data.assignedTo !== currentUsername) {
+            showError("You are not assigned to this node and cannot update its status.");
+            return;
+          }
+
           const colorMap = {
             pending: "#3b82f6",
             stuck: "#facc15",
@@ -610,6 +630,7 @@ const Content = ({ selectedProjectId }) => {
             )
           );
         }}
+
       />
     </ReactFlow>
   );

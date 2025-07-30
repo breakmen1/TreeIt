@@ -34,6 +34,9 @@ public class GraphNode {
     @Column(name = "ASSIGNED_TO")
     private String assignedTo;
 
+	@Column(name = "CREATOR_ID")
+    private String creatorId;
+
     @Column(name = "ASSIGNED_AT")
     private LocalDateTime assignedAt;
 
@@ -54,6 +57,8 @@ public class GraphNode {
 
 	@Column(columnDefinition = "TEXT",name ="DESCRIPTION")
 	private String description;
+
+
 
 	public String getGraphNodeId() {
 		return graphNodeId;
@@ -85,6 +90,14 @@ public class GraphNode {
 
 	public void setAssignedTo(String assignedTo) {
 		this.assignedTo = assignedTo;
+	}
+
+	public String getCreatorId() {
+		return creatorId;
+	}
+
+	public void setCreatorId(String creatorId) {
+		this.creatorId = creatorId;
 	}
 
 	public LocalDateTime getAssignedAt() {
