@@ -21,6 +21,8 @@ const LeftSidebar = ({
   const [allMembers, setAllMembers] = useState([]);
   const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [modalProject, setModalProject] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
 
   // ⬇️ Fetch all members when Add Members modal is opened
   useEffect(() => {
@@ -124,21 +126,22 @@ const LeftSidebar = ({
         </div>
 
         {/* Projects list with transition */}
+        {/* Projects list with scroll (max 5 visible at once) */}
         <div
-          className={`transition-all duration-300 ease-in-out overflow-hidden ${isProjectOpen ? "max-h-[1000px] opacity-100" : "max-h-0 opacity-0"
-            }`}
+          className={`transition-all duration-300 ease-in-out ${isProjectOpen ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"
+            } overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100`}
         >
           {projects.map((project) => {
             const isSelected = project.projectId === selectedProjectId;
             return (
               <div
                 key={project.projectId}
-                className={`mb-3 shadow-sm rounded ${isSelected ? "bg-blue-400" : "bg-gray-50"} transition`}
+                className={`mb-2 shadow-sm rounded ${isSelected ? "bg-blue-400" : "bg-white"} transition`}
               >
-                <div className="flex justify-between items-center px-3 py-2 rounded hover:bg-white-400">
+                <div className="flex justify-between items-center px-3 py-2 rounded hover:bg-gray-100">
                   <button
                     onClick={() => onSelectProjectClick(project.projectId)}
-                    className="text-left w-full font-medium text-gray-800"
+                    className="text-left w-full font-medium text-gray-800 truncate"
                   >
                     {project.name}
                   </button>
@@ -174,6 +177,7 @@ const LeftSidebar = ({
           })}
         </div>
 
+
         {/* Create project button */}
         <button
           onClick={onAddProject}
@@ -189,24 +193,38 @@ const LeftSidebar = ({
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-white p-6 rounded shadow-lg w-80">
             <h3 className="text-xl mb-4">Add Members to {modalProject.name}</h3>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by username"
+              className="w-full mb-3 px-3 py-1 border rounded text-sm"
+            />
+
             <div className="max-h-48 overflow-y-auto mb-4">
-              {candidateMembers.map((m) => (
-                <label key={m.memberId} className="block mb-1">
-                  <input
-                    type="checkbox"
-                    value={m.memberId}
-                    onChange={(e) => {
-                      const id = m.memberId;
-                      setSelectedCandidates((prev) =>
-                        e.target.checked
-                          ? [...prev, id]
-                          : prev.filter((x) => x !== id)
-                      );
-                    }}
-                  />{" "}
-                  {m.username}
-                </label>
-              ))}
+              {candidateMembers
+                .filter((m) =>
+                  m.username.toLowerCase().includes(searchQuery.toLowerCase())
+                )
+                .sort((a, b) => a.username.localeCompare(b.username))
+                .map((m) => (
+                  <label key={m.memberId} className="block mb-1">
+                    <input
+                      type="checkbox"
+                      value={m.memberId}
+                      onChange={(e) => {
+                        const id = m.memberId;
+                        setSelectedCandidates((prev) =>
+                          e.target.checked
+                            ? [...prev, id]
+                            : prev.filter((x) => x !== id)
+                        );
+                      }}
+                    />{" "}
+                    {m.username}
+                  </label>
+                ))}
+
             </div>
             <div className="text-right space-x-2">
               <button onClick={() => setModalProject(null)} className="px-3 py-1">

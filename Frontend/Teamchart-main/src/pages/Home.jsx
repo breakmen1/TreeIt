@@ -26,6 +26,7 @@ const Home = () => {
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [nameError, setNameError] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchAllMembers = async () => {
     try {
@@ -150,13 +151,14 @@ const Home = () => {
             <div className="bg-white p-6 rounded shadow w-96">
               <h2 className="text-xl font-bold mb-4">Create New Project</h2>
 
+              {/* Project Name Input */}
               <input
                 type="text"
                 placeholder="Project Name"
                 value={newProjectName}
                 onChange={(e) => {
                   setNewProjectName(e.target.value);
-                  if (nameError) setNameError(false); // clear error on typing
+                  if (nameError) setNameError(false);
                 }}
                 className={`w-full mb-1 border px-3 py-2 ${nameError ? "border-red-500" : "border-gray-300"
                   }`}
@@ -165,28 +167,45 @@ const Home = () => {
                 <p className="text-red-500 text-sm mb-3">Project name is required.</p>
               )}
 
-              <div className="max-h-40 overflow-y-auto border p-2 mb-4">
-                {allMembers.filter((member) => member.memberId != localStorage.getItem("memberId")).map((member) => (
-                  <label key={member.memberId} className="block mb-1 text-sm">
-                    <input
-                      type="checkbox"
-                      value={member.memberId}
-                      checked={selectedMembers.includes(member.memberId)}
-                      onChange={(e) => {
-                        const memberId = member.memberId;
-                        setSelectedMembers((prev) =>
-                          prev.includes(memberId)
-                            ? prev.filter((uid) => uid !== memberId)
-                            : [...prev, memberId]
-                        );
-                      }}
-                      className="mr-2"
-                    />
-                    {member.username}
-                  </label>
-                ))}
+              {/* 🔍 Live Member Search */}
+              <input
+                type="text"
+                placeholder="Search members..."
+                className="w-full mb-2 px-3 py-1 border border-gray-300 text-sm"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+
+              {/* ✅ Filtered Member List */}
+              <div className="max-h-40 overflow-y-auto border p-2 mb-4 text-sm">
+                {allMembers
+                  .filter((m) => m.memberId !== localStorage.getItem("memberId"))
+                  .filter((m) =>
+                    m.username.toLowerCase().includes(searchTerm.toLowerCase())
+                  )
+                  .sort((a, b) => a.username.localeCompare(b.username))
+                  .map((member) => (
+                    <label key={member.memberId} className="block mb-1">
+                      <input
+                        type="checkbox"
+                        value={member.memberId}
+                        checked={selectedMembers.includes(member.memberId)}
+                        onChange={(e) => {
+                          const id = member.memberId;
+                          setSelectedMembers((prev) =>
+                            prev.includes(id)
+                              ? prev.filter((x) => x !== id)
+                              : [...prev, id]
+                          );
+                        }}
+                        className="mr-2"
+                      />
+                      {member.username}
+                    </label>
+                  ))}
               </div>
 
+              {/* Buttons */}
               <div className="flex justify-end gap-2">
                 <button
                   className="px-4 py-2 bg-gray-300 rounded"
@@ -204,6 +223,7 @@ const Home = () => {
             </div>
           </div>
         )}
+
       </div>
     </PageWrapper>
   );
