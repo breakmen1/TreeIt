@@ -62,3 +62,24 @@ code {
   padding: 20px;
   border-radius: 8px;
 }
+
+.react-quill {
+  min-height: 150px;
+}
+
+.compact-quill .ql-toolbar {
+  padding: 4px;
+  border-radius: 8px 8px 0 0;
+}
+
+.compact-quill .ql-container {
+  min-height: 80px;
+  max-height: 120px;
+  overflow-y: auto;
+  border-radius: 0 0 8px 8px;
+}
+
+.compact-quill .ql-editor {
+  font-size: 0.85rem;
+  padding: 6px;
+}

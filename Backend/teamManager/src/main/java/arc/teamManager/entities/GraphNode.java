@@ -58,8 +58,6 @@ public class GraphNode {
 	@Column(columnDefinition = "TEXT",name ="DESCRIPTION")
 	private String description;
 
-
-
 	public String getGraphNodeId() {
 		return graphNodeId;
 	}

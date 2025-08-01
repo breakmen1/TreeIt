@@ -31,6 +31,15 @@ import { useGlobalContext } from "./Sidebar";
 import "reactflow/dist/style.css";
 import NodeDetailsModal from "./NodeDetailsModal";
 import { showError, showSuccess, showInfo } from "../utils/ToastUtil";
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import TextField from '@mui/material/TextField';
+import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { Button } from '@mui/material';
+
 
 const nodeTypes = {
   circle: CircleNode,
@@ -68,12 +77,13 @@ const Content = ({ selectedProjectId }) => {
   const [showModal, setShowModal] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [status, setStatus] = useState("");
+  const [description, setDescription] = useState('');
 
   const [newNodeInput, setNewNodeInput] = useState({
     id: "",
     task: "",
     assignedTo: "",
-    deadline: "",
+    deadline: new Date(),
     color: "#ffffff",
   });
   const { getNodes } = useReactFlow();
@@ -259,6 +269,7 @@ const Content = ({ selectedProjectId }) => {
         creatorId: memberId,
         deadline: newNodeInput.deadline || new Date().toISOString(), // default now
         status: "unpicked",
+        description: description,
         onStatusChange: (newStatus) => {
           setNodes((prevNodes) =>
             prevNodes.map((n) =>
@@ -300,6 +311,8 @@ const Content = ({ selectedProjectId }) => {
       nodes: formattedNodes,
       edges: formattedEdges,
     });
+
+    setDescription("");
 
   };
   const saveGraph = async () => {
@@ -438,12 +451,12 @@ const Content = ({ selectedProjectId }) => {
               <div className="flex flex-col space-y-3 ">
                 <div className="flex flex-col space-y-3">
                   {/* Task Input */}
-                  <label className="text-sm text-gray-600 mb-1 block">Task</label>
-                  <input
+                  <TextField
+                    label="Task"
                     type="text"
-                    placeholder="Enter task"
-                    className="border border-gray-300 rounded-md px-2 py-1 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    maxLength={20}
+                    variant="outlined"
+                    fullWidth
+                    size="small"
                     onChange={(e) =>
                       setNewNodeInput((prev) => ({
                         ...prev,
@@ -453,73 +466,92 @@ const Content = ({ selectedProjectId }) => {
                     value={newNodeInput.task}
                   />
 
-                  {/* Assigned To Dropdown */}
-                  <label className="text-sm text-gray-600 mb-1 block mt-4">Assign To</label>
-                  <select
-                    className="border border-gray-300 rounded-md px-2 py-1 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    value={newNodeInput.assignedTo}
-                    onChange={(e) =>
-                      setNewNodeInput((prev) => ({
-                        ...prev,
-                        assignedTo: e.target.value,
-                      }))
-                    }
-                  >
-                    <option value="">Select a member</option>
-                    {projectMembers.map((member) => (
-                      <option key={member.memberId} value={member.username}>
-                        {member.username}
-                      </option>
-                    ))}
-                  </select>
-
-                  <label className="text-sm text-gray-600 mb-1 block">Deadline</label>
-                  <input
-                    type="datetime-local"
-                    className="border border-gray-300 rounded-md px-2 py-1 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    value={newNodeInput.deadline}
-                    min={getLocalDateTime()}
-                    onChange={(e) => {
-                      const selectedTime = new Date(e.target.value);
-                      const now = new Date();
-
-                      if (selectedTime < now) {
-                        showError("Please select a future date and time.");
-                        return;
-                      }
-
-                      setNewNodeInput((prev) => ({
-                        ...prev,
-                        deadline: e.target.value,
-                      }));
-                    }}
+                  {/* Description input */}
+                  <TextField
+                    label="Description"
+                    variant="outlined"
+                    multiline
+                    minRows={2}
+                    maxRows={6}
+                    fullWidth
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
                   />
 
+                  {/* Assigned To Dropdown */}
+                  <FormControl fullWidth>
+                    <InputLabel id="assignTo-label">Assign To</InputLabel>
+                    <Select
+                      labelId="assignTo-label"
+                      id="assignTo"
+                      value={newNodeInput.assignedTo}
+                      label="Assign To"
+                      onChange={(e) =>
+                        setNewNodeInput((prev) => ({
+                          ...prev,
+                          assignedTo: e.target.value,
+                        }))
+                      }
+                    >
+                      {projectMembers.map((member) => (
+                        <MenuItem key={member.memberId} value={member.username}>
+                          {member.username}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
 
-                  <button
-                    className="p-[4px]  text-white bg-slate-700 hover:bg-slate-800 active:bg-slate-900 rounded"
+                  <LocalizationProvider dateAdapter={AdapterDateFns}>
+                    <DateTimePicker
+                      label="Deadline"
+                      value={new Date(newNodeInput.deadline)}
+                      minDateTime={new Date()}
+                      onChange={(newValue) =>
+                        setNewNodeInput((prev) => ({
+                          ...prev,
+                          deadline: newValue.toISOString(),
+                        }))
+                      }
+                      renderInput={(params) => (
+                        <TextField {...params} fullWidth size="small" />
+                      )}
+                    />
+                  </LocalizationProvider>
+
+
+                  <Button
+                    variant="contained"
+                    sx={{
+                      textTransform: 'none', // disables uppercase
+                    }}
                     onClick={handleCreateNode}
                   >
                     Create Node
-                  </button>
+                  </Button>
                 </div>
               </div>
               {/* Save and Restore Buttons */}
               <div className="flex flex-col space-y-3">
                 <div className="flex flex-row space-x-3">
-                  <button
-                    className="flex-1 p-2 text-sm text-white transition duration-300 ease-in-out rounded bg-slate-700 hover:bg-slate-800 active:bg-slate-900"
+                  <Button
+                    variant="contained"
+                    sx={{
+                      textTransform: 'none', // disables uppercase
+                    }}
                     onClick={saveGraph}
                   >
                     Save
-                  </button>
+                  </Button>
 
-                  <button
-                    className="flex-1 p-2 text-sm text-white rounded bg-slate-700 hover:bg-slate-800 active:bg-slate-900"
+                  <Button
+                    variant="contained"
+                    sx={{
+                      textTransform: 'none', // disables uppercase
+                    }}
                     onClick={onClick}
                   >
                     Download{" "}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
