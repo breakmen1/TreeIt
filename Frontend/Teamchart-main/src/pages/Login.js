@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../components/BaseAPI";
+import api from "../components/utility/BaseAPI";
 import "../style/Login.css";
 import loginImage from '../images/Login.gif';
-import Loading from "../components/Loading";
-import PageWrapper from "../components/PageWrapper";
+import Loading from "../components/ui/Loading";
+import PageWrapper from "../components/ui/PageWrapper";
 import { showError, showSuccess, showInfo } from "../utils/ToastUtil";
 
 function Login({ onLogin }) {

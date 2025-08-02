@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import { useReactFlow } from "reactflow";
-import {layoutNodesWithDagre} from "./DagreLayoutHelper";
-import api from "./BaseAPI";
+import {layoutNodesWithDagre} from "../utility/DagreLayoutHelper";
+import api from "../utility/BaseAPI";
 
 export default function ContextMenu({
   id,
@@ -24,7 +24,6 @@ export default function ContextMenu({
       fitView({ padding: 0.3, includeHiddenNodes: true });
     }, 100); // delay to ensure layout is applied
   };
-
 
   const deleteNode = useCallback(() => {
     const deletedNode = api.post(`/nodes/${id}/deleteNode`);

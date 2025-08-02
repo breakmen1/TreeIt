@@ -1,6 +1,6 @@
-import './../style/NodeDetailsModal.css';
+import './../../style/NodeDetailsModal.css';
 import { useState } from 'react';
-import { showError, showSuccess, showInfo } from "../utils/ToastUtil";
+import { showError, showSuccess, showInfo } from "../../utils/ToastUtil";
 
 const NodeDetailsModal = ({ show, onClose, nodeName, description, todos, isCompleted, assignedTo, creatorId, onToggleTodo, onMarkCompleted, onAddTodo, status, onStatusChange, }) => {
   const [newTodo, setNewTodo] = useState('');

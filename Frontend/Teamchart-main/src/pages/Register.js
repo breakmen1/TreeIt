@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import api from '../components/BaseAPI';
+import api from '../components/utility/BaseAPI';
 import { Link, redirect } from 'react-router-dom';
 import registerImage from '../images/Register.gif'; // adjust path if in another folder
 import "../style/Register.css";
-import PageWrapper from "../components/PageWrapper";
+import PageWrapper from "../components/ui/PageWrapper";
 import { useNavigate } from 'react-router-dom';
 import { showError, showSuccess, showInfo } from "../utils/ToastUtil";
 

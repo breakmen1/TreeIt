@@ -1,20 +1,14 @@
 import React, { useEffect, useState } from "react";
-import LeftSidebar from "../components/LeftSide";
+
+import api from "../components/utility/BaseAPI";
+
+import ReactFlowProviderContent from "../components/GraphPage";
+import LeftSidebar from "../components/LeftsidePanel";
+import PageWrapper from "../components/ui/PageWrapper";
+
 import { FaBars } from "react-icons/fa";
 import { useGlobalContext } from "../components/Sidebar";
-import ReactFlowProviderContent from "../components/HomeComponent";
-import { v4 as uuidv4 } from "uuid";
-import api from "../components/BaseAPI";
 import { showError, showSuccess, showInfo } from "../utils/ToastUtil";
-import {
-  showErrorAlert,
-  showSuccessAlert,
-  showConfirmAlert,
-} from '../utils/SweetAlertUtil';
-import PageWrapper from "../components/PageWrapper";
-
-
-
 
 const Home = () => {
   const { openSidebar, isSidebarOpen } = useGlobalContext();
