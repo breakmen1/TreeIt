@@ -140,37 +140,41 @@ const Home = () => {
         </div>
 
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white p-6 rounded shadow w-96">
-              <h2 className="text-xl font-bold mb-4">Create New Project</h2>
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-white w-full max-w-md p-6 rounded-2xl shadow-xl border border-gray-100">
+              <h2 className="text-2xl font-semibold mb-5 text-gray-800">Create New Project</h2>
 
               {/* Project Name Input */}
-              <input
-                type="text"
-                placeholder="Project Name"
-                value={newProjectName}
-                onChange={(e) => {
-                  setNewProjectName(e.target.value);
-                  if (nameError) setNameError(false);
-                }}
-                className={`w-full mb-1 border px-3 py-2 ${nameError ? "border-red-500" : "border-gray-300"
-                  }`}
-              />
-              {nameError && (
-                <p className="text-red-500 text-sm mb-3">Project name is required.</p>
-              )}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Project Name"
+                  value={newProjectName}
+                  onChange={(e) => {
+                    setNewProjectName(e.target.value);
+                    if (nameError) setNameError(false);
+                  }}
+                  className={`w-full rounded-xl px-4 py-2 border outline-none transition focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm ${nameError ? "border-red-500" : "border-gray-300"
+                    }`}
+                />
+                {nameError && (
+                  <p className="text-red-500 text-xs mt-1">Project name is required.</p>
+                )}
+              </div>
 
               {/* 🔍 Live Member Search */}
-              <input
-                type="text"
-                placeholder="Search members..."
-                className="w-full mb-2 px-3 py-1 border border-gray-300 text-sm"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Search members..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full rounded-xl px-4 py-2 border border-gray-300 text-sm outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400"
+                />
+              </div>
 
               {/* ✅ Filtered Member List */}
-              <div className="max-h-40 overflow-y-auto border p-2 mb-4 text-sm">
+              <div className="max-h-40 overflow-y-auto border border-gray-200 rounded-lg p-3 mb-5 text-sm bg-gray-50">
                 {allMembers
                   .filter((m) => m.memberId !== localStorage.getItem("memberId"))
                   .filter((m) =>
@@ -178,12 +182,12 @@ const Home = () => {
                   )
                   .sort((a, b) => a.username.localeCompare(b.username))
                   .map((member) => (
-                    <label key={member.memberId} className="block mb-1">
+                    <label key={member.memberId} className="flex items-center mb-2 cursor-pointer">
                       <input
                         type="checkbox"
                         value={member.memberId}
                         checked={selectedMembers.includes(member.memberId)}
-                        onChange={(e) => {
+                        onChange={() => {
                           const id = member.memberId;
                           setSelectedMembers((prev) =>
                             prev.includes(id)
@@ -191,23 +195,23 @@ const Home = () => {
                               : [...prev, id]
                           );
                         }}
-                        className="mr-2"
+                        className="mr-3 accent-blue-500"
                       />
-                      {member.username}
+                      <span className="text-gray-700">{member.username}</span>
                     </label>
                   ))}
               </div>
 
               {/* Buttons */}
-              <div className="flex justify-end gap-2">
+              <div className="flex justify-end gap-3">
                 <button
-                  className="px-4 py-2 bg-gray-300 rounded"
+                  className="px-4 py-2 rounded-xl bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
                   onClick={() => setIsModalOpen(false)}
                 >
                   Cancel
                 </button>
                 <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded"
+                  className="px-4 py-2 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition"
                   onClick={() => handleAddProject(newProjectName)}
                 >
                   Create
@@ -216,7 +220,6 @@ const Home = () => {
             </div>
           </div>
         )}
-
       </div>
     </PageWrapper>
   );

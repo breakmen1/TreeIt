@@ -20,151 +20,156 @@ const RightsidePanel = ({
 }) => {
     return (
         <div
-            className={`transition-all  duration-500  fixed top-0 ${isSidebarOpen ? "right-0" : "-right-64"
+            className={`transition-all duration-500 fixed top-0 z-40 ${isSidebarOpen ? "right-0" : "-right-72"
                 }`}
         >
-            <div className="relative flex flex-col w-64 h-screen min-h-screen px-4 py-8 overflow-y-auto bg-white border-r">
-                <div className="">
-                    <button
-                        onClick={closeSidebar}
-                        className="absolute flex items-center justify-center w-8 h-8 ml-6 text-gray-600 rounded-full top-1 right-1"
-                    >
-                        {/* <HiX className="w-5 h-5" /> */}
-                        <BiSolidDockLeft className="w-5 h-5" />
-                    </button>
-                    <h2 className="text-3xl font-semibold text-gray-700 ">
-                        Node <span className="-ml-1 text-pink-500 ">Data</span>
-                    </h2>
-                </div>
-                <hr className="my-0 mt-[0.20rem]" />
-                <div className="flex flex-col justify-between flex-1 mt-3">
-                    <div className="flex flex-col justify-start space-y-5 h-[calc(100vh-135px)]">
-                        {/* Create Node Section */}
-                        <div className="flex flex-col space-y-3 ">
-                            <div className="flex flex-col space-y-3">
-                                {/* Task Input */}
-                                <TextField
-                                    label="Task"
-                                    type="text"
-                                    variant="outlined"
-                                    fullWidth
-                                    size="small"
-                                    onChange={(e) =>
-                                        setNewNodeInput((prev) => ({
-                                            ...prev,
-                                            task: e.target.value,
-                                        }))
-                                    }
-                                    value={newNodeInput.task}
-                                />
+            <div className="relative flex flex-col w-72 h-screen px-5 py-6 bg-white shadow-xl border-l border-gray-200 rounded-l-xl">
+                {/* Close Button */}
+                <button
+                    onClick={closeSidebar}
+                    className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition"
+                >
+                    <BiSolidDockLeft className="w-5 h-5" />
+                </button>
 
-                                {/* Description input */}
-                                <TextField
-                                    label="Description"
-                                    variant="outlined"
-                                    multiline
-                                    minRows={2}
-                                    maxRows={6}
-                                    fullWidth
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                />
+                {/* Title */}
+                <h2 className="text-2xl font-semibold text-gray-800 mb-3">
+                    Node <span className="text-pink-500">Data</span>
+                </h2>
 
-                                {/* Assigned To Dropdown */}
-                                <FormControl fullWidth>
-                                    <InputLabel id="assignTo-label">Assign To</InputLabel>
-                                    <Select
-                                        labelId="assignTo-label"
-                                        id="assignTo"
-                                        value={newNodeInput.assignedTo}
-                                        label="Assign To"
-                                        onChange={(e) =>
-                                            setNewNodeInput((prev) => ({
-                                                ...prev,
-                                                assignedTo: e.target.value,
-                                            }))
-                                        }
-                                    >
-                                        {projectMembers.map((member) => (
-                                            <MenuItem key={member.memberId} value={member.username}>
-                                                {member.username}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
+                <hr className="mb-4 border-gray-200" />
 
-                                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                                    <DateTimePicker
-                                        label="Deadline"
-                                        value={new Date(newNodeInput.deadline)}
-                                        minDateTime={new Date()}
-                                        onChange={(newValue) =>
-                                            setNewNodeInput((prev) => ({
-                                                ...prev,
-                                                deadline: newValue.toISOString(),
-                                            }))
-                                        }
-                                        renderInput={(params) => (
-                                            <TextField {...params} fullWidth size="small" />
-                                        )}
-                                    />
-                                </LocalizationProvider>
+                {/* Content Wrapper */}
+                <div className="flex flex-col justify-between h-full space-y-0">
+                    {/* Node Creation Form */}
+                    <div className="space-y-4">
+                        {/* Task */}
+                        <TextField
+                            label="Task"
+                            variant="outlined"
+                            fullWidth
+                            size="small"
+                            placeholder="Enter task title"
+                            value={newNodeInput.task}
+                            onChange={(e) =>
+                                setNewNodeInput((prev) => ({
+                                    ...prev,
+                                    task: e.target.value,
+                                }))
+                            }
+                            sx={{
+                                backgroundColor: "#f9f9f9",
+                                borderRadius: 2,
+                            }}
+                        />
 
+                        {/* Description */}
+                        <TextField
+                            label="Description"
+                            variant="outlined"
+                            multiline
+                            minRows={2}
+                            maxRows={5}
+                            fullWidth
+                            value={description}
+                            placeholder="Optional notes..."
+                            onChange={(e) => setDescription(e.target.value)}
+                            sx={{
+                                backgroundColor: "#f9f9f9",
+                                borderRadius: 2,
+                            }}
+                        />
 
-                                <Button
-                                    variant="contained"
-                                    sx={{
-                                        textTransform: 'none', // disables uppercase
-                                    }}
-                                    onClick={handleCreateNode}
-                                >
-                                    Create Node
-                                </Button>
-                            </div>
-                        </div>
-                        {/* Save and Restore Buttons */}
-                        <div className="flex flex-col space-y-3">
-                            <div className="flex flex-row space-x-3">
-                                <Button
-                                    variant="contained"
-                                    sx={{
-                                        textTransform: 'none', // disables uppercase
-                                    }}
-                                    onClick={saveGraph}
-                                >
-                                    Save
-                                </Button>
+                        {/* Assignee */}
+                        <FormControl fullWidth size="small">
+                            <InputLabel id="assignTo-label">Assign To</InputLabel>
+                            <Select
+                                labelId="assignTo-label"
+                                value={newNodeInput.assignedTo}
+                                label="Assign To"
+                                onChange={(e) =>
+                                    setNewNodeInput((prev) => ({
+                                        ...prev,
+                                        assignedTo: e.target.value,
+                                    }))
+                                }
+                            >
+                                {projectMembers.map((member) => (
+                                    <MenuItem key={member.memberId} value={member.username}>
+                                        {member.username}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
 
-                                <Button
-                                    variant="contained"
-                                    sx={{
-                                        textTransform: 'none', // disables uppercase
-                                    }}
-                                    onClick={handleDownload}
-                                >
-                                    Download{" "}
-                                </Button>
-                            </div>
-                        </div>
+                        {/* Deadline */}
+                        <LocalizationProvider dateAdapter={AdapterDateFns}>
+                            <DateTimePicker
+                                label="Deadline"
+                                value={new Date(newNodeInput.deadline)}
+                                minDateTime={new Date()}
+                                onChange={(newValue) =>
+                                    setNewNodeInput((prev) => ({
+                                        ...prev,
+                                        deadline: newValue.toISOString(),
+                                    }))
+                                }
+                                renderInput={(params) => (
+                                    <TextField {...params} fullWidth size="small" />
+                                )}
+                            />
+                        </LocalizationProvider>
 
-                        <hr className="my-0" />
-                        <div className="flex justify-center px-4 pb-2 mt-auto -mx-4 bottom-3">
-                            <h4 className=" text-[12px] font-semibold text-gray-600 ">
-                                {/* Made with <FaHeart className="inline-block " /> by{" "} */}
-                                <a
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    href=""
-                                    className="cursor-pointer hover:underline hover:text-blue-500"
-                                >
-                                    {/* Akash. */}
-                                </a>
-                            </h4>
+                        {/* Create Button */}
+                        <Button
+                            variant="contained"
+                            fullWidth
+                            sx={{
+                                textTransform: "none",
+                                bgcolor: "#3b82f6", // Tailwind blue-500
+                                "&:hover": {
+                                    bgcolor: "#2563eb", // Tailwind blue-600
+                                },
+                                borderRadius: 2,
+                                py: 1.2,
+                                fontWeight: 600,
+                            }}
+                            onClick={handleCreateNode}
+                        >
+                            Create Node
+                        </Button>
+
+                        {/* Save & Download Buttons */}
+                        <div className="flex gap-3">
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                sx={{
+                                    textTransform: "none",
+                                    borderRadius: 2,
+                                }}
+                                onClick={saveGraph}
+                            >
+                                Save
+                            </Button>
+
+                            <Button
+                                fullWidth
+                                variant="outlined"
+                                sx={{
+                                    textTransform: "none",
+                                    borderRadius: 2,
+                                }}
+                                onClick={handleDownload}
+                            >
+                                Download
+                            </Button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+
 
     );
 };

@@ -127,24 +127,25 @@ const LeftSidebar = ({
         {/* Projects list with scroll (max 5 visible at once) */}
         <div
           className={`transition-all duration-300 ease-in-out ${isProjectOpen ? "max-h-[300px] opacity-100" : "max-h-0 opacity-0"
-            } overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100`}
+            } overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100`}
         >
           {projects.map((project) => {
             const isSelected = project.projectId === selectedProjectId;
             return (
               <div
                 key={project.projectId}
-                className={`mb-2 shadow-sm rounded ${isSelected ? "bg-blue-400" : "bg-white"} transition`}
+                className={`mb-2 rounded-2xl shadow-sm border ${isSelected ? "bg-blue-100 border-blue-300" : "bg-white border-gray-200"
+                  } transition`}
               >
-                <div className="flex justify-between items-center px-3 py-2 rounded hover:bg-gray-100">
+                <div className="flex justify-between items-center px-4 py-2 rounded-2xl hover:bg-blue-200 transition-colors">
                   <button
                     onClick={() => onSelectProjectClick(project.projectId)}
-                    className="text-left w-full font-medium text-gray-800 truncate"
+                    className="text-left w-full font-semibold text-gray-800 truncate"
                   >
                     {project.name}
                   </button>
                   <button
-                    className="ml-2 px-1 py-1 hover:bg-gray-200 rounded text-lg"
+                    className="ml-2 px-2 py-1 hover:bg-blue-300 text-gray-700 rounded-2xl transition"
                     onClick={(e) => {
                       e.stopPropagation();
                       toggleMenu(project.projectId);
@@ -155,15 +156,15 @@ const LeftSidebar = ({
                 </div>
 
                 {menuOpenId === project.projectId && (
-                  <div className="pl-4 pb-2 text-sm text-gray-700 animate-fadeIn">
+                  <div className="px-4 pb-3 text-sm text-gray-700 animate-fadeIn space-y-1">
                     <button
-                      className="block w-full text-left py-1 hover:bg-gray-100 rounded"
+                      className="w-full text-left py-1 px-2 rounded-md hover:bg-gray-100 transition"
                       onClick={() => openAddMemberModal(project)}
                     >
                       ➕ Add Members
                     </button>
                     <button
-                      className="block w-full text-left py-1 text-red-600 hover:bg-red-50 rounded"
+                      className="w-full text-left py-1 px-2 rounded-md text-red-600 hover:bg-red-50 transition"
                       onClick={() => handleDeleteProject(project.projectId)}
                     >
                       🗑 Delete Project
@@ -175,38 +176,43 @@ const LeftSidebar = ({
           })}
         </div>
 
-
-        {/* Create project button */}
+        {/* ✨ Beautiful Create Project Button */}
         <button
           onClick={onAddProject}
-          className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded shadow transition"
+          className="mt-3 px-12 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out"
         >
-          Create Project
+          + Create Project
         </button>
 
 
+
       </div>
-      {/* Add Members Modal */}
       {modalProject && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-80">
-            <h3 className="text-xl mb-4">Add Members to {modalProject.name}</h3>
+          <div className="bg-white p-6 rounded-2xl shadow-2xl w-96 max-w-full">
+            <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+              Add Members to <span className="text-blue-600">{modalProject.name}</span>
+            </h3>
+
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search by username"
-              className="w-full mb-3 px-3 py-1 border rounded text-sm"
+              className="w-full mb-4 px-4 py-2 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
 
-            <div className="max-h-48 overflow-y-auto mb-4">
+            <div className="max-h-48 overflow-y-auto mb-4 space-y-2">
               {candidateMembers
                 .filter((m) =>
                   m.username.toLowerCase().includes(searchQuery.toLowerCase())
                 )
                 .sort((a, b) => a.username.localeCompare(b.username))
                 .map((m) => (
-                  <label key={m.memberId} className="block mb-1">
+                  <label
+                    key={m.memberId}
+                    className="flex items-center gap-2 px-3 py-2 border rounded-lg cursor-pointer hover:bg-blue-50"
+                  >
                     <input
                       type="checkbox"
                       value={m.memberId}
@@ -218,20 +224,23 @@ const LeftSidebar = ({
                             : prev.filter((x) => x !== id)
                         );
                       }}
-                    />{" "}
-                    {m.username}
+                    />
+                    <span className="text-gray-700 text-sm">{m.username}</span>
                   </label>
                 ))}
-
             </div>
-            <div className="text-right space-x-2">
-              <button onClick={() => setModalProject(null)} className="px-3 py-1">
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setModalProject(null)}
+                className="px-4 py-2 rounded-xl text-sm bg-gray-200 hover:bg-gray-300 text-gray-700 transition"
+              >
                 Cancel
               </button>
               <button
                 onClick={handleUpdateMembers}
                 disabled={selectedCandidates.length === 0}
-                className="px-4 py-1 bg-blue-600 text-white rounded disabled:opacity-50"
+                className="px-4 py-2 rounded-xl text-sm bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 transition"
               >
                 Update Members
               </button>
@@ -239,6 +248,7 @@ const LeftSidebar = ({
           </div>
         </div>
       )}
+
 
 
       {/* Profile Modal */}

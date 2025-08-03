@@ -12,7 +12,7 @@ import ReactFlow, {
   getRectOfNodes,
   getTransformForBounds,
   MarkerType,
-  BaseEdge, 
+  BaseEdge,
   getBezierPath,
 } from "reactflow";
 
@@ -569,12 +569,13 @@ const ReactFlowProviderContent = ({ selectedProjectId }) => {
   return (
     <ReactFlowProvider>
       <div
-        className={`h-[calc(100vh-74px)] flex flex-col  ${isSidebarOpen ? "mr-64" : ""
+        className={`flex flex-col h-[calc(97vh-74px)] overflow-x-hidden ${isSidebarOpen ? "mr-64" : ""
           }`}
       >
         <Content selectedProjectId={selectedProjectId} />
       </div>
     </ReactFlowProvider>
+
   );
 };
 
