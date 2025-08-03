@@ -40,7 +40,7 @@ function Login({ onLogin }) {
 
   return (
     <PageWrapper>
-      <div className="login-wrapper">
+      <div className="login-wrapper font-poppins">
         {isLoading && <Loading />}
         <div className="login-left">
           <div className="login-logo">Tree It</div>

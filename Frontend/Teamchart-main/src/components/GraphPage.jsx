@@ -11,6 +11,9 @@ import ReactFlow, {
   useReactFlow,
   getRectOfNodes,
   getTransformForBounds,
+  MarkerType,
+  BaseEdge, 
+  getBezierPath,
 } from "reactflow";
 
 import CircleNode from "./node/Node";
@@ -464,6 +467,40 @@ const Content = ({ selectedProjectId }) => {
     );
   };
 
+  const edgeStyle = {
+    type: 'bezier',
+    animated: true,
+    style: {
+      stroke: 'black',
+      strokeWidth: 2,
+      filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))',
+      strokeDasharray: '5 5',
+    },
+    markerEnd: {
+      type: MarkerType.ArrowClosed,
+      color: 'black',
+    },
+  };
+
+  const customEdgeLine = ({ fromX, fromY, toX, toY }) => {
+    const [edgePath] = getBezierPath({
+      sourceX: fromX,
+      sourceY: fromY,
+      targetX: toX,
+      targetY: toY,
+    });
+
+    return (
+      <path
+        d={edgePath}
+        stroke="blue"
+        strokeWidth={2}
+        fill="none"
+        style={{ strokeDasharray: '5 5' }}
+      />
+    );
+  };
+
   return (
     <ReactFlow
       ref={ref}
@@ -479,6 +516,8 @@ const Content = ({ selectedProjectId }) => {
       onEdgeUpdate={onEdgeUpdate}
       onEdgeUpdateStart={onEdgeUpdateStart}
       onEdgeUpdateEnd={onEdgeUpdateEnd}
+      defaultEdgeOptions={edgeStyle}
+      connectionLineComponent={customEdgeLine}
       onPaneClick={onPaneClick}
       onNodeContextMenu={onNodeContextMenu}
       nodeTypes={nodeTypes}
@@ -499,7 +538,7 @@ const Content = ({ selectedProjectId }) => {
 
       <Controls />
       <MiniMap zoomable pannable />
-      <Background variant="lines" gap={30} color="#aaa" lineWidth={0.5} />
+      <Background variant="lines" gap={30} color="#aaa" lineWidth={0.3} />
 
       {/* node properties on right click */}
       {menu && <NodeProperties onClick={onPaneClick} {...menu} />}

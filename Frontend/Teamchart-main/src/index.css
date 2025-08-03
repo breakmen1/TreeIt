@@ -1,6 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
   margin: 0;
-  font-family: 'Segoe UI';
+  @apply font-poppins; /* or use font-inter */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-y: scroll;
@@ -17,10 +21,6 @@ body::-webkit-scrollbar {
 code {
   font-family: 'Segoe UI';
 }
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @layer utilities {
 

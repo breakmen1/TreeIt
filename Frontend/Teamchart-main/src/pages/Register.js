@@ -36,7 +36,7 @@ function Register() {
 
   return (
     <PageWrapper>
-      <div className="register-wrapper">
+      <div className="register-wrapper font-poppins">
         <div className="register-right">
           <img src={registerImage} alt="register Visual" className="register-image" />
 

@@ -104,7 +104,7 @@ const Home = () => {
 
   return (
     <PageWrapper>
-      <div>
+      <div className="font-poppins">
         {/* Sidebar */}
         <LeftSidebar
           projects={projects}
@@ -126,8 +126,8 @@ const Home = () => {
             </button>
           </div>
           <div>
-            <h2 className="mt-[0.34rem] text-3xl font-semibold text-gray-700">
-              TreeIt <span className="-ml-1 text-pink-500">Chart</span>
+            <h2 className="font-poppins mt-2 text-4xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent tracking-tight">
+              TreeIt <span className="font-poppins from-green-300 to-green-500 bg-gradient-to-r bg-clip-text text-transparent">Chart</span>
             </h2>
           </div>
         </div>
