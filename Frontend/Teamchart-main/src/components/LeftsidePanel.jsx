@@ -8,7 +8,6 @@ const LeftSidebar = ({
   setSelectedProjectId
 }) => {
   const username = localStorage.getItem("username") || "User";
-  const avatarKey = `avatar-${username}`;
   const defaultAvatar = `https://api.dicebear.com/7.x/initials/svg?seed=${username}&backgroundType=gradientLinear&fontFamily=Trebuchet%20MS&fontSize=41`;
 
   const [isProjectOpen, setIsProjectOpen] = useState(true);
@@ -19,7 +18,6 @@ const LeftSidebar = ({
   const [selectedCandidates, setSelectedCandidates] = useState([]);
 
   const [allMembers, setAllMembers] = useState([]);
-  const [isMemberModalOpen, setIsMemberModalOpen] = useState(false);
   const [modalProject, setModalProject] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 

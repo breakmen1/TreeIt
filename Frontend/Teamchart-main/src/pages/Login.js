@@ -5,7 +5,7 @@ import "../style/Login.css";
 import loginImage from '../images/Login.gif';
 import Loading from "../components/ui/Loading";
 import PageWrapper from "../components/ui/PageWrapper";
-import { showError, showSuccess, showInfo } from "../utils/ToastUtil";
+import { showError, showSuccess, showInfo } from "../components/utility/ToastNotofication";
 
 function Login({ onLogin }) {
   const [form, setForm] = useState({ username: "", password: "" });

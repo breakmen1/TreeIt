@@ -7,8 +7,8 @@ import LeftSidebar from "../components/LeftsidePanel";
 import PageWrapper from "../components/ui/PageWrapper";
 
 import { FaBars } from "react-icons/fa";
-import { useGlobalContext } from "../components/Sidebar";
-import { showError, showSuccess, showInfo } from "../utils/ToastUtil";
+import { useGlobalContext } from "../components/utility/SidebarSlide";
+import { showError, showSuccess, showInfo } from "../components/utility/ToastNotofication";
 
 const Home = () => {
   const { openSidebar, isSidebarOpen } = useGlobalContext();
@@ -19,7 +19,6 @@ const Home = () => {
   const [newProjectName, setNewProjectName] = useState("");
   const [selectedMembers, setSelectedMembers] = useState([]);
   const [nameError, setNameError] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
 
   const fetchAllMembers = async () => {

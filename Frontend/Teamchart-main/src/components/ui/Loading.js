@@ -1,5 +1,3 @@
-// src/components/Loading.js
-import React from "react";
 import { motion } from "framer-motion";
 import "../../style/Loading.css";
 

@@ -1,11 +1,10 @@
-
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import { createBrowserRouter, RouterProvider, BrowserRouter } from "react-router-dom";
 
-import { AppProvider } from "./components/Sidebar";
+import { AppProvider } from "./components/utility/SidebarSlide";
 const router = createBrowserRouter([
   {
     path: "/",

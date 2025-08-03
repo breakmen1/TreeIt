@@ -1,37 +1,20 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Handle, Position } from "reactflow";
-import { FaTasks, FaUser } from "react-icons/fa";
 import ReactDOM from "react-dom";
 
+import { FaTasks, FaUser } from "react-icons/fa";
+import { FcOvertime } from "react-icons/fc";
 
 export default function CircleNode({ data }) {
+
+  // States Start
   const nodeRef = useRef(null);
-  const [hoverPos, setHoverPos] = useState(null);
-  const [isHovered, setIsHovered] = useState(false);
   const timeoutRef = useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
+  const [hoverPos, setHoverPos] = useState(null);
+  // States End
 
-  const getRemainingTime = (deadline) => {
-    const now = new Date();
-    const end = new Date(deadline);
-    const diff = end - now;
-    if (diff <= 0) return "Past due";
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-    const min = Math.floor((diff / (1000 * 60)) % 60);
-    return ` ${days}d ${hours}h ${min}m `;
-  };
-
-  const handleMouseEnter = () => {
-    clearTimeout(timeoutRef.current);
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = () => {
-    timeoutRef.current = setTimeout(() => {
-      setIsHovered(false);
-    }, 500);
-  };
-
+  // useEffects start
   useEffect(() => {
     const handleMouseMove = (e) => {
       if (nodeRef.current && nodeRef.current.contains(e.target)) {
@@ -48,6 +31,18 @@ export default function CircleNode({ data }) {
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
+  // useEffects End
+
+  const handleMouseEnter = () => {
+    clearTimeout(timeoutRef.current);
+    setIsHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setIsHovered(false);
+    }, 500);
+  };
 
   // Status-based gradient colors
   const statusGradient = {
@@ -59,6 +54,17 @@ export default function CircleNode({ data }) {
 
   const gradient =
     statusGradient[data.status] || statusGradient.default;
+
+  const getRemainingTime = (deadline) => {
+    const now = new Date();
+    const end = new Date(deadline);
+    const diff = end - now;
+    if (diff <= 0) return "Past due";
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    const min = Math.floor((diff / (1000 * 60)) % 60);
+    return ` ${days}d ${hours}h ${min}m `;
+  };
 
   return (
     <div
@@ -97,7 +103,8 @@ export default function CircleNode({ data }) {
                 <span><strong>Assigned:</strong> {data.assignedTo}</span>
               </div>
               <div className="flex items-start gap-2 mb-1">
-                <span><strong>⌛ Remaining : </strong>{data.deadline ? getRemainingTime(data.deadline) : "None"}</span>
+                <FcOvertime className="mt-[3px]" />
+                <span><strong>Remaining : </strong>{data.deadline ? getRemainingTime(data.deadline) : "None"}</span>
               </div>
             </div>
           </div>,

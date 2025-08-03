@@ -5,7 +5,7 @@ import registerImage from '../images/Register.gif'; // adjust path if in another
 import "../style/Register.css";
 import PageWrapper from "../components/ui/PageWrapper";
 import { useNavigate } from 'react-router-dom';
-import { showError, showSuccess, showInfo } from "../utils/ToastUtil";
+import { showError, showSuccess, showInfo } from "../components/utility/ToastNotofication";
 
 
 

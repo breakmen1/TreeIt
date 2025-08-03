@@ -1,13 +1,4 @@
-import React, {
-  useCallback,
-  useState,
-  useEffect,
-  useRef,
-  useMemo,
-} from "react";
-import CircleNode from "./node/Node";
-import { v4 as uuidv4 } from "uuid";
-import api from "./utility/BaseAPI";
+import React, { useCallback, useState, useEffect, useRef, useMemo, } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -22,17 +13,20 @@ import ReactFlow, {
   getTransformForBounds,
 } from "reactflow";
 
+import CircleNode from "./node/Node";
 import RightsidePanel from "./RightsidePanel";
-import ContextMenu from "./node/NodeProperties";
-import { toPng } from "html-to-image";
-import "reactflow/dist/style.css";
-import { useGlobalContext } from "./Sidebar";
-import "reactflow/dist/style.css";
-import NodeDetailsModal from "./node/NodeDetailsModal";
-import { showError, showSuccess, showInfo } from "../utils/ToastUtil";
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import NodeProperties from "./node/NodeRightClick";
+import Nodecard from "./node/Nodecard";
 
+import { v4 as uuidv4 } from "uuid";
+import { toPng } from "html-to-image";
+
+import api from "./utility/BaseAPI";
+import { useGlobalContext } from "./utility/SidebarSlide";
+import { showError, showSuccess, showInfo } from "./utility/ToastNotofication";
+
+import "reactflow/dist/style.css";
+import 'react-quill/dist/quill.snow.css';
 
 const imageWidth = 1024;
 const imageHeight = 768;
@@ -56,6 +50,7 @@ const Content = ({ selectedProjectId }) => {
   const [id, setId] = useState(0);
   const [projectMembers, setProjectMembers] = useState([]);
   const { isSidebarOpen, closeSidebar } = useGlobalContext();
+  const [selectedNode, setSelectedNode] = useState(null);
   const [newNodeInput, setNewNodeInput] = useState({
     id: "",
     task: "",
@@ -73,13 +68,12 @@ const Content = ({ selectedProjectId }) => {
   const [status, setStatus] = useState("");
   const [edges, setEdges, onEdgesChange] = useEdgesState([{ id: "e1-2", source: "1", target: "2" }]);
   const edgeUpdateSuccessful = useRef(true);
-  const [selectedNode, setSelectedNode] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [menu, setMenu] = useState(null);
   const [todos, setTodos] = useState([]);
   // States End
 
-  // Useeffects Start
+  // UseEffects Start
   useEffect(() => {
     const fetchProjectMembers = async () => {
       if (!selectedProjectId) return;
@@ -133,7 +127,7 @@ const Content = ({ selectedProjectId }) => {
 
     fetchGraphData();
   }, [selectedProjectId]); // 👈 refetch when selected project changes
-  // Useeffects End
+  // UseEffects End
 
   // Reactflow inbuilt start
   const getId = useCallback(() => {
@@ -393,6 +387,83 @@ const Content = ({ selectedProjectId }) => {
     }
   }, []);
 
+  const onToggleTodo = async (todoId) => {
+    await api.post(`/todos/${todoId}/toggle`);
+    const res = await api.get(`/nodes/${nodeId}/todos`);
+    setTodos(res.data); // No need for res.json() if you're using axios
+  };
+
+  const onMarkCompleted = async () => {
+    try {
+      await api.post(`/nodes/${nodeId}/complete`);
+      setIsCompleted(true);
+      setNodeColor("green");
+      setShowModal(false);
+      setNodes((prevNodes) =>
+        prevNodes.map((node) =>
+          node.id === nodeId
+            ? { ...node, data: { ...node.data, status: "completed" } }
+            : node
+        )
+      );
+      showError("Node marked as completed successfully!");
+    } catch (error) {
+      // If error response is from backend, show an alert
+      if (error.response && error.response.data) {
+        showError(
+          error.response.data.message ||
+          "All todos must be completed before marking as completed."
+        );
+      } else {
+        showError("Something went wrong. Please try again.");
+      }
+    }
+  };
+
+  const onAddTodo = async (newTask) => {
+    const localMemberId = localStorage.getItem("memberId");
+    await api.post(`/nodes/${nodeId}/todos`, {
+      task: newTask,
+      memberId: localMemberId,
+    });
+    const res = await api.get(`/nodes/${nodeId}/todos`);
+    setTodos(res.data);
+  };
+
+  const onStatusChange = (newStatus) => {
+    if (!nodeId) return;
+
+    const currentUsername = localStorage.getItem("username");
+    const node = nodes.find((n) => n.id === nodeId);
+
+    if (!node) {
+      showError("Node not found.");
+      return;
+    }
+
+    if (node.data.assignedTo !== currentUsername) {
+      showError("You are not assigned to this node and cannot update its status.");
+      return;
+    }
+
+    const colorMap = {
+      pending: "#3b82f6",
+      stuck: "#facc15",
+      completed: "green",
+    };
+
+    setNodeColor(colorMap[newStatus] || "#ffffff");
+    setStatus(newStatus);
+
+    setNodes((prevNodes) =>
+      prevNodes.map((n) =>
+        n.id === nodeId
+          ? { ...n, data: { ...n.data, status: newStatus } }
+          : n
+      )
+    );
+  };
+
   return (
     <ReactFlow
       ref={ref}
@@ -428,12 +499,12 @@ const Content = ({ selectedProjectId }) => {
 
       <Controls />
       <MiniMap zoomable pannable />
-      <Background variant="lines" gap={30} color="#aaa" lineWidth={0.5}/>
+      <Background variant="lines" gap={30} color="#aaa" lineWidth={0.5} />
 
-      {/* context menu */}
-      {menu && <ContextMenu onClick={onPaneClick} {...menu} />}
+      {/* node properties on right click */}
+      {menu && <NodeProperties onClick={onPaneClick} {...menu} />}
 
-      <NodeDetailsModal
+      <Nodecard
         show={showModal}
         onClose={() => setShowModal(false)}
         nodeName={nodeName}
@@ -442,80 +513,11 @@ const Content = ({ selectedProjectId }) => {
         isCompleted={isCompleted}
         assignedTo={selectedNode?.data.assignedTo}
         creatorId={selectedNode?.data.creatorId}
-        onToggleTodo={async (todoId) => {
-          await api.post(`/todos/${todoId}/toggle`);
-          const res = await api.get(`/nodes/${nodeId}/todos`);
-          setTodos(res.data); // No need for res.json() if you're using axios
-        }}
-        onMarkCompleted={async () => {
-          try {
-            await api.post(`/nodes/${nodeId}/complete`);
-            setIsCompleted(true);
-            setNodeColor("green");
-            setShowModal(false);
-            setNodes((prevNodes) =>
-              prevNodes.map((node) =>
-                node.id === nodeId
-                  ? { ...node, data: { ...node.data, status: "completed" } }
-                  : node
-              )
-            );
-            showError("Node marked as completed successfully!");
-          } catch (error) {
-            // If error response is from backend, show an alert
-            if (error.response && error.response.data) {
-              showError(
-                error.response.data.message ||
-                "All todos must be completed before marking as completed."
-              );
-            } else {
-              showError("Something went wrong. Please try again.");
-            }
-          }
-        }}
-        onAddTodo={async (newTask) => {
-          const localMemberId = localStorage.getItem("memberId");
-          await api.post(`/nodes/${nodeId}/todos`, {
-            task: newTask,
-            memberId: localMemberId,
-          });
-          const res = await api.get(`/nodes/${nodeId}/todos`);
-          setTodos(res.data);
-        }}
+        onToggleTodo={onToggleTodo}
+        onMarkCompleted={onMarkCompleted}
+        onAddTodo={onAddTodo}
         status={status}
-        onStatusChange={(newStatus) => {
-          if (!nodeId) return;
-
-          const currentUsername = localStorage.getItem("username");
-          const node = nodes.find((n) => n.id === nodeId);
-
-          if (!node) {
-            showError("Node not found.");
-            return;
-          }
-
-          if (node.data.assignedTo !== currentUsername) {
-            showError("You are not assigned to this node and cannot update its status.");
-            return;
-          }
-
-          const colorMap = {
-            pending: "#3b82f6",
-            stuck: "#facc15",
-            completed: "green",
-          };
-
-          setNodeColor(colorMap[newStatus] || "#ffffff");
-          setStatus(newStatus);
-
-          setNodes((prevNodes) =>
-            prevNodes.map((n) =>
-              n.id === nodeId
-                ? { ...n, data: { ...n.data, status: newStatus } }
-                : n
-            )
-          );
-        }}
+        onStatusChange={onStatusChange}
 
       />
     </ReactFlow>

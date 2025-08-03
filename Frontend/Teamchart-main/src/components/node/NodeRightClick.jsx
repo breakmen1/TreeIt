@@ -1,9 +1,10 @@
 import React, { useCallback } from "react";
 import { useReactFlow } from "reactflow";
-import {layoutNodesWithDagre} from "../utility/DagreLayoutHelper";
-import api from "../utility/BaseAPI";
 
-export default function ContextMenu({
+import api from "../utility/BaseAPI";
+import {layoutNodesWithDagre} from "../utility/DagreLayoutHelper";
+
+export default function NodeProperties({
   id,
   top,
   left,

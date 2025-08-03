@@ -1,4 +1,3 @@
-// components/PageWrapper.js
 import { motion } from "framer-motion";
 import { useEffect } from "react";
 const pageVariants = {

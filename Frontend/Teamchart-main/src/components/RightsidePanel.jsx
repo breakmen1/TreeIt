@@ -1,4 +1,3 @@
-import React from "react";
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -6,7 +5,6 @@ import TextField from '@mui/material/TextField';
 import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import { Button } from '@mui/material';
 import { BiSolidDockLeft } from "react-icons/bi";
-import { FaHeart } from "react-icons/fa";
 
 const RightsidePanel = ({
     isSidebarOpen,
