@@ -501,6 +501,28 @@ const Content = ({ selectedProjectId }) => {
     );
   };
 
+  const onDeadlineChange = async (newDeadline) => {
+    try {
+      await api.post(`/nodes/${nodeId}/update-deadline`, { deadline: newDeadline });
+      setNodes((prevNodes) =>
+        prevNodes.map((n) =>
+          n.id === nodeId
+            ? {
+              ...n,
+              data: {
+                ...n.data,
+                deadline: newDeadline,
+              },
+            }
+            : n
+        )
+      );
+    } catch (err) {
+      console.error("Error updating deadline:", err);
+      throw err;
+    }
+  }
+
   return (
     <ReactFlow
       ref={ref}
@@ -557,7 +579,8 @@ const Content = ({ selectedProjectId }) => {
         onAddTodo={onAddTodo}
         status={status}
         onStatusChange={onStatusChange}
-
+        nodeData={selectedNode?.data}
+        onDeadlineChange={onDeadlineChange}
       />
     </ReactFlow>
   );

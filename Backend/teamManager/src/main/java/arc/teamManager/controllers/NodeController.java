@@ -1,6 +1,8 @@
 package arc.teamManager.controllers;
 
 import java.util.List;
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import arc.teamManager.dto.DeadlineUpdateRequest;
 import arc.teamManager.dto.TodoRequest;
 import arc.teamManager.entities.GraphEdge;
 import arc.teamManager.entities.GraphNode;
@@ -36,7 +40,7 @@ public class NodeController {
     @Autowired
     private NodeService nodeService;
 
-    Logger log =  LoggerFactory.getLogger(this.getClass());
+    Logger log = LoggerFactory.getLogger(this.getClass());
 
     @PostMapping("/save")
     public ResponseEntity<?> saveGraph(@RequestBody GraphDataRequest request) {
@@ -45,21 +49,19 @@ public class NodeController {
         return ResponseEntity.ok("Saved successfully");
     }
 
-
-    //to modify description
+    // to modify description
     @PostMapping("/updateDescription")
-    public ResponseEntity<String> updateDescription(@RequestBody String description, @RequestBody String nodeId){
-        String updatedDescription = nodeService.updatedDescription(description,nodeId);
+    public ResponseEntity<String> updateDescription(@RequestBody String description, @RequestBody String nodeId) {
+        String updatedDescription = nodeService.updatedDescription(description, nodeId);
         return ResponseEntity.ok("");
     }
 
-    
     public String postMethodName(@RequestBody String entity) {
-        //TODO: process POST request
-        
+        // TODO: process POST request
+
         return entity;
     }
-    
+
     @GetMapping("/load/{projectId}")
     public ResponseEntity<GraphDataRequest> loadGraph(@PathVariable String projectId) {
         try {
@@ -76,23 +78,22 @@ public class NodeController {
         }
     }
 
-    //Todos controllers
+    // Todos controllers
     @GetMapping("/nodes/{nodeId}/todos")
     public ResponseEntity<List<Todo>> getTodos(@PathVariable String nodeId) {
         System.out.println("get todos called");
         List<Todo> todos = todoService.getTodosByNodeId(nodeId);
-        log.info("todos get -->"+todos);
+        log.info("todos get -->" + todos);
         return ResponseEntity.ok(todos);
     }
 
     // 2. Add a todo to a node
     @PostMapping("/nodes/{nodeId}/todos")
-    public Todo addTodo(@PathVariable String nodeId, @RequestBody TodoRequest rq
-            ) {
+    public Todo addTodo(@PathVariable String nodeId, @RequestBody TodoRequest rq) {
         log.info("inside addTodo --> ");
-        log.info("node Id --> "+nodeId);
-        log.info("Req.get(task) -->"+rq.getTask());
-        log.info("creator member id -->"+rq.getMemberId());
+        log.info("node Id --> " + nodeId);
+        log.info("Req.get(task) -->" + rq.getTask());
+        log.info("creator member id -->" + rq.getMemberId());
         return todoService.addTodo(nodeId, rq, rq.getMemberId());
     }
 
@@ -116,6 +117,20 @@ public class NodeController {
     @PostMapping("/nodes/{nodeId}/deleteEdges")
     public String deleteEdges(@PathVariable String nodeId) {
         return nodeService.deleteNodeEdges(nodeId);
+    }
+
+    @PostMapping("/nodes/{id}/update-deadline")
+    public ResponseEntity<String> updateDeadline(
+            @PathVariable("id") String nodeId,
+            @RequestBody Map<String, String> payload) {
+        String newDeadline = payload.get("deadline");
+        try {
+            nodeService.updateDeadline(nodeId, newDeadline);
+            return ResponseEntity.ok("Deadline updated successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating deadline: " + e.getMessage());
+        }
     }
 
 }

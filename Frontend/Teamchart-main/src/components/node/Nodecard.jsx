@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { showError, showSuccess, showInfo } from "../utility/ToastNotofication";
 
@@ -17,11 +17,20 @@ const Nodecard = ({
   onMarkCompleted,
   onAddTodo,
   status,
-  onStatusChange, 
+  onStatusChange,
+  nodeData,
+  onDeadlineChange,
 }) => {
   // States Start
   const [newTodo, setNewTodo] = useState('');
+  const [deadline, setDeadline] = useState(new Date());
   // States End
+
+  useEffect(() => {
+    if (show) {
+      setDeadline(nodeData.deadline);
+    }
+  }, []);
 
   if (!show) return null;
 
@@ -58,6 +67,38 @@ const Nodecard = ({
               <option value="pending">Pending</option>
               <option value="stuck">Stuck</option>
             </select>
+          </div>
+        )}
+
+        {/* Deadline editor (only for creator) */}
+        {creatorId === loggedInMemberId && (
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Edit Deadline
+            </label>
+            <input
+              type="datetime-local"
+              value={deadline}
+              onChange={(e) => setDeadline(e.target.value)}
+              className="w-full rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 p-2 text-sm"
+            />
+            <button
+              onClick={async () => {
+                if (!deadline) {
+                  showError("Deadline cannot be empty");
+                  return;
+                }
+                try {
+                  await onDeadlineChange(deadline);
+                  showSuccess("Deadline updated successfully!");
+                } catch (e) {
+                  showError("Failed to update deadline");
+                }
+              }}
+              className="mt-2 bg-blue-600 text-white text-sm py-2 px-6 rounded hover:bg-blue-700 transition"
+            >
+              Update Deadline
+            </button>
           </div>
         )}
 
