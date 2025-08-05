@@ -20,6 +20,7 @@ import CircleNode from "./node/Node";
 import RightsidePanel from "./RightsidePanel";
 import NodeProperties from "./node/NodeRightClick";
 import Nodecard from "./node/Nodecard";
+import CardNode from "./node/CardNode";
 
 import { v4 as uuidv4 } from "uuid";
 import { toPng } from "html-to-image";
@@ -35,6 +36,7 @@ const imageWidth = 1024;
 const imageHeight = 768;
 const nodeTypes = {
   circle: CircleNode,
+  card: CardNode
 };
 
 function downloadImage(dataUrl) {
@@ -103,12 +105,13 @@ const Content = ({ selectedProjectId }) => {
         const backendNodes = res.data.nodes.map((node) => ({
           id: node.graphNodeId.toString(),
           position: { x: node.posX, y: node.posY },
-          type: "circle",
+          type: node.type || "card", // change this to "card" to use CardNode
           data: {
             projectId: node.projectId,
             task: node.task,
             assignedTo: node.assignedTo,
             creatorId: node.creatorId,
+            createdTime: node.createdTime,
             deadline: node.deadline,
             status: node.status,
           },
@@ -120,7 +123,7 @@ const Content = ({ selectedProjectId }) => {
           target: edge.target.toString(),
         }));
 
-        console.log("nodes from backend" + backendNodes);
+        console.log("nodes from backend" + res.data.nodes);
         setNodes(enhanceNodesWithStatusHandler(backendNodes));
         setEdges(backendEdges);
       } catch (err) {
@@ -278,12 +281,13 @@ const Content = ({ selectedProjectId }) => {
     const newNode = {
       id: uuidv4(),
       position: { x: 100, y: 100 },
-      type: "circle",
+      type: "card",
       data: {
         projectId: selectedProjectId,
         task: newNodeInput.task,
         assignedTo: newNodeInput.assignedTo,
         creatorId: memberId,
+        createdTime: new Date().toISOString(),
         deadline: newNodeInput.deadline || new Date().toISOString(), // default now
         status: "unpicked",
         description: description,
@@ -312,6 +316,7 @@ const Content = ({ selectedProjectId }) => {
       task: node.data.task,
       assignedTo: node.data.assignedTo,
       creatorId: node.data.creatorId,
+      createdTime: node.data.createdTime, // <-- ADD THIS
       assignedAt: new Date().toISOString(), // if needed
       deadline: node.data.deadline,
       status: node.data.status,

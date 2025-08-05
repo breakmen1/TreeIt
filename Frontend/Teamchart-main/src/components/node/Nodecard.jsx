@@ -63,7 +63,7 @@ const Nodecard = ({
               onChange={(e) => onStatusChange(e.target.value)}
               className="w-full rounded-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500 p-2 text-sm"
             >
-              <option value="">None</option>
+              <option value="unpicked">None</option>
               <option value="pending">Pending</option>
               <option value="stuck">Stuck</option>
             </select>

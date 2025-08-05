@@ -21,42 +21,53 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GraphNode {
-    @Id
-    @Column(name = "GRAPHNODE_ID", nullable = false)
-    private String graphNodeId;
+	@Id
+	@Column(name = "GRAPHNODE_ID", nullable = false)
+	private String graphNodeId;
 
-    @Column(name = "PROJECT_ID")
-    private String projectId;
+	@Column(name = "PROJECT_ID")
+	private String projectId;
 
-    @Column(name = "TASK")
-    private String task;
+	@Column(name = "TASK")
+	private String task;
 
-    @Column(name = "ASSIGNED_TO")
-    private String assignedTo;
+	@Column(name = "ASSIGNED_TO")
+	private String assignedTo;
 
 	@Column(name = "CREATOR_ID")
-    private String creatorId;
+	private String creatorId;
 
-    @Column(name = "ASSIGNED_AT")
-    private LocalDateTime assignedAt;
+	@Column(name = "ASSIGNED_AT")
+	private LocalDateTime assignedAt;
 
-    @Column(name = "DEADLINE")
-    private String deadline;
+	@Column(name = "DEADLINE")
+	private String deadline;
 
-    @Column(name = "STATUS")
-    private String status;
+	@Column(name = "STATUS")
+	private String status;
 
-    @Column(name = "POS_X")
-    private int posX;
+	@Column(name = "POS_X")
+	private int posX;
 
-    @Column(name = "POS_Y")
-    private int posY;
+	@Column(name = "POS_Y")
+	private int posY;
 
-    @OneToMany(mappedBy="node", cascade=CascadeType.ALL)
-    private List<Todo> todos;
+	@OneToMany(mappedBy = "node", cascade = CascadeType.ALL)
+	private List<Todo> todos;
 
-	@Column(columnDefinition = "TEXT",name ="DESCRIPTION")
+	@Column(columnDefinition = "TEXT", name = "DESCRIPTION")
 	private String description;
+
+	@Column(name = "CREATED_TIME")
+	private String createdTime; // Store as ISO string since your frontend sends it this way
+
+	public String getCreatedTime() {
+		return createdTime;
+	}
+
+	public void setCreatedTime(String createdTime) {
+		this.createdTime = createdTime;
+	}
 
 	public String getGraphNodeId() {
 		return graphNodeId;

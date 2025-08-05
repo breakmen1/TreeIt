@@ -1,7 +1,7 @@
 import dagre from "dagre";
 
-const nodeWidth = 172;
-const nodeHeight = 36;
+const nodeWidth = 260;
+const nodeHeight = 100;
 
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -10,8 +10,18 @@ dagreGraph.setDefaultEdgeLabel(() => ({}));
 export const layoutNodesWithDagre = (nodes, edges, direction = "TB") => {
   dagreGraph.setGraph({ rankdir: direction });
 
+  const getNodeSize = (type) => {
+    switch (type) {
+      case "card":
+        return { width: 260, height: 100 };
+      default:
+        return { width: 172, height: 36 }; // circle fallback
+    }
+  };
+
   nodes.forEach((node) => {
-    dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    const { width, height } = getNodeSize(node.type);
+    dagreGraph.setNode(node.id, { width, height });
   });
 
   edges.forEach((edge) => {
@@ -28,9 +38,10 @@ export const layoutNodesWithDagre = (nodes, edges, direction = "TB") => {
     node.sourcePosition = isHorizontal ? "right" : "bottom";
 
     // Centering the node since dagre returns top-left corner
+    const { width, height } = getNodeSize(node.type);
     node.position = {
-      x: nodeWithPosition.x - nodeWidth / 2,
-      y: nodeWithPosition.y - nodeHeight / 2,
+      x: nodeWithPosition.x - width / 2,
+      y: nodeWithPosition.y - height / 2,
     };
 
     return node;
