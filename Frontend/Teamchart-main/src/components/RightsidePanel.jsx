@@ -33,10 +33,10 @@ const RightsidePanel = ({
                 </button>
 
                 {/* Title */}
-                <h2 className="text-2xl font-semibold text-gray-800 mb-3">
-                    Node <span className="text-pink-500">Data</span>
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">
+                    Node <span className="text-blue-500">Details</span>
                 </h2>
-
+                <p className="text-sm text-gray-400 mb-4">Enter task and deadline info</p>
                 <hr className="mb-4 border-gray-200" />
 
                 {/* Content Wrapper */}

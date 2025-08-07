@@ -13,7 +13,7 @@ export const layoutNodesWithDagre = (nodes, edges, direction = "TB") => {
   const getNodeSize = (type) => {
     switch (type) {
       case "card":
-        return { width: 260, height: 100 };
+        return { width: 360, height: 200 };
       default:
         return { width: 172, height: 36 }; // circle fallback
     }

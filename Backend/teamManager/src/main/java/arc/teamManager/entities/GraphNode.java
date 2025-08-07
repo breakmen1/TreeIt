@@ -34,6 +34,9 @@ public class GraphNode {
 	@Column(name = "ASSIGNED_TO")
 	private String assignedTo;
 
+	@Column(name = "ASSIGNED_BY")
+	private String assignedBy;
+
 	@Column(name = "CREATOR_ID")
 	private String creatorId;
 
@@ -99,6 +102,14 @@ public class GraphNode {
 
 	public void setAssignedTo(String assignedTo) {
 		this.assignedTo = assignedTo;
+	}
+
+	public String getAssignedBy() {
+		return assignedBy;
+	}
+
+	public void setAssignedBy(String assignedBy) {
+		this.assignedBy = assignedBy;
 	}
 
 	public String getCreatorId() {

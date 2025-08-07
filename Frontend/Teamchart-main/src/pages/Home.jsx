@@ -126,8 +126,9 @@ const Home = () => {
             </button>
           </div>
           <div>
-            <h2 className="font-poppins mt-2 text-4xl font-bold bg-gradient-to-r from-blue-300 to-blue-500 bg-clip-text text-transparent tracking-tight">
-              TreeIt <span className="font-poppins from-green-300 to-green-500 bg-gradient-to-r bg-clip-text text-transparent">Chart</span>
+            {/* Title */}
+            <h2 className="mt-2 text-4xl font-bold text-gray-800 mb-2">
+              TreeIt <span className="text-blue-500">Chart</span>
             </h2>
           </div>
         </div>

@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import { useReactFlow } from "reactflow";
 
 import api from "../utility/BaseAPI";
-import {layoutNodesWithDagre} from "../utility/DagreLayoutHelper";
+import { layoutNodesWithDagre } from "../utility/DagreLayoutHelper";
 
 export default function NodeProperties({
   id,
@@ -36,26 +36,29 @@ export default function NodeProperties({
   return (
     <div
       style={{ top, left, right, bottom }}
-      className="absolute z-10 bg-white border rounded-md shadow-xl outline"
+      className="absolute z-50 min-w-[160px] bg-white border border-gray-300 rounded-lg shadow-lg p-2 transition-all duration-150"
       {...props}
     >
-      <p style={{ margin: "0.5em" }}>
-        <small>node: {id}</small>
-      </p>
-      <button
-        onClick={deleteNode}
-        className="hover:bg-slate-200 bg-slate-100 block p-[0.5em] text-left w-[100%]"
-      >
-        <small>Delete</small>
-      </button>
+      <ul className="mt-2 space-y-1">
+        <li>
+          <button
+            onClick={deleteNode}
+            className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 hover:text-red-700 rounded-md transition"
+          >
+            🗑️ Delete Node
+          </button>
+        </li>
 
-      <button
-        onClick={applyAutoLayout}
-        className="hover:bg-slate-200 bg-slate-100 block p-[0.5em] text-left w-[100%]"
-      >
-        <small>Auto layout</small>
-      </button>
-
+        <li>
+          <button
+            onClick={applyAutoLayout}
+            className="w-full text-left px-3 py-2 text-sm text-blue-600 hover:bg-blue-50 hover:text-blue-700 rounded-md transition"
+          >
+            🧠 Auto Layout
+          </button>
+        </li>
+      </ul>
     </div>
   );
+
 }

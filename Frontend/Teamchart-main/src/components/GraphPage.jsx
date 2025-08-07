@@ -20,7 +20,7 @@ import CircleNode from "./node/Node";
 import RightsidePanel from "./RightsidePanel";
 import NodeProperties from "./node/NodeRightClick";
 import Nodecard from "./node/Nodecard";
-import CardNode from "./node/CardNode";
+import RectangularNode from "./node/RectangularNode";
 
 import { v4 as uuidv4 } from "uuid";
 import { toPng } from "html-to-image";
@@ -36,7 +36,7 @@ const imageWidth = 1024;
 const imageHeight = 768;
 const nodeTypes = {
   circle: CircleNode,
-  card: CardNode
+  card: RectangularNode
 };
 
 function downloadImage(dataUrl) {
@@ -110,6 +110,7 @@ const Content = ({ selectedProjectId }) => {
             projectId: node.projectId,
             task: node.task,
             assignedTo: node.assignedTo,
+            assignedBy: node.assignedBy,
             creatorId: node.creatorId,
             createdTime: node.createdTime,
             deadline: node.deadline,
@@ -277,6 +278,7 @@ const Content = ({ selectedProjectId }) => {
     }
 
     const memberId = localStorage.getItem("memberId");
+    const assignedBy = localStorage.getItem("username");
 
     const newNode = {
       id: uuidv4(),
@@ -287,6 +289,7 @@ const Content = ({ selectedProjectId }) => {
         task: newNodeInput.task,
         assignedTo: newNodeInput.assignedTo,
         creatorId: memberId,
+        assignedBy: assignedBy,
         createdTime: new Date().toISOString(),
         deadline: newNodeInput.deadline || new Date().toISOString(), // default now
         status: "unpicked",
@@ -316,6 +319,7 @@ const Content = ({ selectedProjectId }) => {
       task: node.data.task,
       assignedTo: node.data.assignedTo,
       creatorId: node.data.creatorId,
+      assignedBy: node.data.assignedBy,
       createdTime: node.data.createdTime, // <-- ADD THIS
       assignedAt: new Date().toISOString(), // if needed
       deadline: node.data.deadline,
@@ -414,7 +418,7 @@ const Content = ({ selectedProjectId }) => {
             : node
         )
       );
-      showError("Node marked as completed successfully!");
+      showSuccess("Node marked as completed successfully!");
     } catch (error) {
       // If error response is from backend, show an alert
       if (error.response && error.response.data) {
@@ -436,6 +440,8 @@ const Content = ({ selectedProjectId }) => {
     });
     const res = await api.get(`/nodes/${nodeId}/todos`);
     setTodos(res.data);
+    showSuccess("Added new todo");
+
   };
 
   const onStatusChange = (newStatus) => {

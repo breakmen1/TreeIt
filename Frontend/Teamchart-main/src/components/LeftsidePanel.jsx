@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "./utility/BaseAPI";
+import { Button } from '@mui/material';
+
 const LeftSidebar = ({
   projects = [],
   onAddProject,
@@ -177,12 +179,23 @@ const LeftSidebar = ({
         </div>
 
         {/* ✨ Beautiful Create Project Button */}
-        <button
+        <Button
+          variant="contained"
+          fullWidth
+          sx={{
+            textTransform: "none",
+            bgcolor: "#3b82f6", // Tailwind blue-500
+            "&:hover": {
+              bgcolor: "#2563eb", // Tailwind blue-600
+            },
+            borderRadius: 2,
+            py: 1.2,
+            fontWeight: 600,
+          }}
           onClick={onAddProject}
-          className="mt-3 px-12 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold text-sm rounded-full shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out"
         >
-          + Create Project
-        </button>
+          Create Project
+        </Button>
 
 
 
