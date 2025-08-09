@@ -133,4 +133,18 @@ public class NodeController {
         }
     }
 
+    @PostMapping("/nodes/{nodeId}/update-stuck-reason")
+    public ResponseEntity<String> updateStuckReason(
+            @PathVariable("nodeId") String nodeId,
+            @RequestBody Map<String, String> payload) {
+        String stuckReason = payload.get("stuckReason");
+        try {
+            nodeService.updateStuckReason(nodeId, stuckReason);
+            return ResponseEntity.ok("Stuck reason updated successfully.");
+        } catch (Exception e) {
+            log.error("Error updating stuck reason: ", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating stuck reason: " + e.getMessage());
+        }
+    }
 }

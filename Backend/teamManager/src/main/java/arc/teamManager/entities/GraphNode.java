@@ -49,6 +49,9 @@ public class GraphNode {
 	@Column(name = "STATUS")
 	private String status;
 
+	@Column(columnDefinition = "TEXT", name = "STUCK_REASON")
+	private String stuckReason;
+
 	@Column(name = "POS_X")
 	private int posX;
 
@@ -142,6 +145,14 @@ public class GraphNode {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+	
+	public String getStuckReason() {
+		return stuckReason;
+	}
+
+	public void setStuckReason(String stuckReason) {
+		this.stuckReason = stuckReason;
 	}
 
 	public int getPosX() {

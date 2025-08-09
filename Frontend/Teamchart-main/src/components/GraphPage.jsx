@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect, useRef, useMemo, } from "react";
+import React, { useCallback, useState, useEffect, useRef, useMemo } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -12,8 +12,8 @@ import ReactFlow, {
   getRectOfNodes,
   getTransformForBounds,
   MarkerType,
-  BaseEdge,
   getBezierPath,
+  Panel
 } from "reactflow";
 
 import CircleNode from "./node/Node";
@@ -24,10 +24,11 @@ import RectangularNode from "./node/RectangularNode";
 
 import { v4 as uuidv4 } from "uuid";
 import { toPng } from "html-to-image";
+import { motion } from "framer-motion";
 
 import api from "./utility/BaseAPI";
 import { useGlobalContext } from "./utility/SidebarSlide";
-import { showError, showSuccess, showInfo } from "./utility/ToastNotofication";
+import { showError, showSuccess } from "./utility/ToastNotofication";
 
 import "reactflow/dist/style.css";
 import 'react-quill/dist/quill.snow.css';
@@ -41,7 +42,6 @@ const nodeTypes = {
 
 function downloadImage(dataUrl) {
   const a = document.createElement("a");
-
   a.setAttribute("download", "flowchart.png");
   a.setAttribute("href", dataUrl);
   a.click();
@@ -50,7 +50,8 @@ function downloadImage(dataUrl) {
 const Content = ({ selectedProjectId }) => {
   const { getNodes } = useReactFlow();
   const ref = useRef(null);
-  // States Start
+  
+  // States
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const [id, setId] = useState(0);
   const [projectMembers, setProjectMembers] = useState([]);
@@ -71,41 +72,37 @@ const Content = ({ selectedProjectId }) => {
   const [nodeColor, setNodeColor] = useState("#ffffff");
   const [isCompleted, setIsCompleted] = useState(false);
   const [status, setStatus] = useState("");
-  const [edges, setEdges, onEdgesChange] = useEdgesState([{ id: "e1-2", source: "1", target: "2" }]);
+  const [stuckReason, setStuckReason] = useState('');
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const edgeUpdateSuccessful = useRef(true);
   const [showModal, setShowModal] = useState(false);
   const [menu, setMenu] = useState(null);
   const [todos, setTodos] = useState([]);
-  // States End
 
-  // UseEffects Start
+  // Fetch project members when project changes
   useEffect(() => {
     const fetchProjectMembers = async () => {
       if (!selectedProjectId) return;
-
       try {
         const res = await api.get(`/projects/${selectedProjectId}/members`);
-        console.log("project refetch happened")
         setProjectMembers(res.data);
       } catch (err) {
         console.error("Failed to fetch project members:", err);
       }
     };
-
     fetchProjectMembers();
   }, [selectedProjectId]);
 
+  // Load graph data when project changes
   useEffect(() => {
     const fetchGraphData = async () => {
       if (!selectedProjectId) return;
-
       try {
-        console.log("calling backend");
         const res = await api.get(`/load/${selectedProjectId}`);
         const backendNodes = res.data.nodes.map((node) => ({
           id: node.graphNodeId.toString(),
           position: { x: node.posX, y: node.posY },
-          type: node.type || "card", // change this to "card" to use CardNode
+          type: node.type || "card",
           data: {
             projectId: node.projectId,
             task: node.task,
@@ -115,6 +112,8 @@ const Content = ({ selectedProjectId }) => {
             createdTime: node.createdTime,
             deadline: node.deadline,
             status: node.status,
+            stuckReason: node.stuckReason,
+            description: node.description,
           },
         }));
 
@@ -124,19 +123,16 @@ const Content = ({ selectedProjectId }) => {
           target: edge.target.toString(),
         }));
 
-        console.log("nodes from backend" + res.data.nodes);
         setNodes(enhanceNodesWithStatusHandler(backendNodes));
         setEdges(backendEdges);
       } catch (err) {
         console.error("❌ Failed to fetch graph data", err);
       }
     };
-
     fetchGraphData();
-  }, [selectedProjectId]); // 👈 refetch when selected project changes
-  // UseEffects End
+  }, [selectedProjectId, setNodes, setEdges]);
 
-  // Reactflow inbuilt start
+  // ReactFlow utility functions
   const getId = useCallback(() => {
     setId((prevId) => prevId + 1);
     return `node_${id}`;
@@ -144,24 +140,14 @@ const Content = ({ selectedProjectId }) => {
 
   const onNodeContextMenu = useCallback(
     (event, node) => {
-      // Prevent native context menu from showing
       event.preventDefault();
-
-      // Calculate position of the context menu. We want to make sure it
-      // doesn't get positioned off-screen.
       const pane = ref.current.getBoundingClientRect();
       setMenu({
         id: node.id,
         top: event.clientY < pane.height - 200 && event.clientY - 60,
-        left:
-          event.clientX < pane.width - 200 &&
-          (isSidebarOpen ? event.clientX - 300 : event.clientX),
-        right:
-          event.clientX >= pane.width - 200 &&
-          pane.width - (isSidebarOpen ? event.clientX - 300 : event.clientX),
-        bottom:
-          event.clientY >= pane.height - 200 &&
-          pane.height - event.clientY + 70,
+        left: event.clientX < pane.width - 200 && (isSidebarOpen ? event.clientX - 300 : event.clientX),
+        right: event.clientX >= pane.width - 200 && pane.width - (isSidebarOpen ? event.clientX - 300 : event.clientX),
+        bottom: event.clientY >= pane.height - 200 && pane.height - event.clientY + 70,
       });
     },
     [setMenu, isSidebarOpen]
@@ -184,14 +170,13 @@ const Content = ({ selectedProjectId }) => {
       if (!edgeUpdateSuccessful.current) {
         setEdges((eds) => eds.filter((e) => e.id !== edge.id));
       }
-
       edgeUpdateSuccessful.current = true;
     },
     [setEdges]
   );
 
   const onConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
+    (params) => setEdges((eds) => addEdge({ ...params, animated: true }, eds)),
     [setEdges]
   );
 
@@ -203,21 +188,14 @@ const Content = ({ selectedProjectId }) => {
   const onDrop = useCallback(
     (event) => {
       event.preventDefault();
-
       const type = event.dataTransfer.getData("application/reactflow");
+      if (typeof type === "undefined" || !type) return;
 
-      // check if the dropped element is valid
-      if (typeof type === "undefined" || !type) {
-        return;
-      }
-
-      // reactFlowInstance.project was renamed to reactFlowInstance.screenToFlowPosition
-      // and you don't need to subtract the reactFlowBounds.left/top anymore
-      // details: https://reactflow.dev/whats-new/2023-11-10
       const position = reactFlowInstance.screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
       });
+      
       const newNode = {
         id: getId(),
         type,
@@ -225,6 +203,8 @@ const Content = ({ selectedProjectId }) => {
         data: { label: `${type} node` },
         style: {
           background: "#ffffff",
+          boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+          transition: "all 0.3s ease",
         },
       };
 
@@ -234,9 +214,6 @@ const Content = ({ selectedProjectId }) => {
   );
 
   const handleDownload = () => {
-    // we calculate a transform for the nodes so that all nodes are visible
-    // we then overwrite the transform of the `.react-flow__viewport` element
-    // with the style option of the html-to-image library
     const nodesBounds = getRectOfNodes(getNodes());
     const transform = getTransformForBounds(
       nodesBounds,
@@ -247,7 +224,7 @@ const Content = ({ selectedProjectId }) => {
     );
 
     toPng(document.querySelector(".react-flow__viewport"), {
-      backgroundColor: "#eef",
+      backgroundColor: "#f8fafc", // Light gray background
       width: imageWidth,
       height: imageHeight,
       style: {
@@ -257,11 +234,11 @@ const Content = ({ selectedProjectId }) => {
       },
     }).then(downloadImage);
   };
-  // Reactflow inbuilt end
 
-  // Close the context menu if it's open whenever the window is clicked.
+  // Close the context menu when clicking elsewhere
   const onPaneClick = useCallback(() => setMenu(null), [setMenu]);
 
+  // Create a new node
   const handleCreateNode = async () => {
     const task = newNodeInput.task.trim();
     if (task === "") {
@@ -291,9 +268,10 @@ const Content = ({ selectedProjectId }) => {
         creatorId: memberId,
         assignedBy: assignedBy,
         createdTime: new Date().toISOString(),
-        deadline: newNodeInput.deadline || new Date().toISOString(), // default now
+        deadline: newNodeInput.deadline || new Date().toISOString(),
         status: "unpicked",
         description: description,
+        stuckReason: '',
         onStatusChange: (newStatus) => {
           setNodes((prevNodes) =>
             prevNodes.map((n) =>
@@ -305,30 +283,43 @@ const Content = ({ selectedProjectId }) => {
         },
       },
     };
-    const updatedNodes = [...nodes, newNode]; // use current state + new node
+    
+    const updatedNodes = [...nodes, newNode];
     setNodes(updatedNodes);
-    setNewNodeInput({ id: "", assignedTo: "", task: "", deadline: new Date().toISOString(), name: "", color: "#ffffff" });
+    setNewNodeInput({ 
+      id: "", 
+      assignedTo: "", 
+      task: "", 
+      deadline: new Date().toISOString(), 
+      name: "", 
+      color: "#ffffff" 
+    });
+    
     await saveGraphNoAlert(updatedNodes, edges);
-    showSuccess('Node created');
+    showSuccess('Node created successfully');
   };
 
+  // Save graph data to backend without alert
   const saveGraphNoAlert = async (nodesArg, edgesArg) => {
     const formattedNodes = nodesArg.map((node) => ({
-      graphNodeId: node.id, // 👈 pass ID from React Flow node
+      graphNodeId: node.id,
       projectId: node.data.projectId,
       task: node.data.task,
       assignedTo: node.data.assignedTo,
       creatorId: node.data.creatorId,
       assignedBy: node.data.assignedBy,
-      createdTime: node.data.createdTime, // <-- ADD THIS
-      assignedAt: new Date().toISOString(), // if needed
+      createdTime: node.data.createdTime,
+      assignedAt: new Date().toISOString(),
       deadline: node.data.deadline,
       status: node.data.status,
+      stuckReason: node.data.stuckReason || '',
+      description: node.data.description || '',
       posX: node.position.x,
       posY: node.position.y,
     }));
+    
     const formattedEdges = edgesArg.map((edge) => ({
-      graphEdgeId: edge.id, // 👈 use same ID from frontend
+      graphEdgeId: edge.id,
       projectId: selectedProjectId,
       source: edge.source,
       target: edge.target,
@@ -342,17 +333,20 @@ const Content = ({ selectedProjectId }) => {
     setDescription("");
   };
 
+  // Save graph with success notification
   const saveGraph = async () => {
     await saveGraphNoAlert(nodes, edges);
-    showSuccess("Graph saved!");
+    showSuccess("Graph saved successfully!");
   };
 
+  // Filter nodes by project ID
   const filteredNodes = useMemo(() => {
     return nodes.filter(
-      (node) => `${node.data.projectId}` == `${selectedProjectId}`
+      (node) => `${node.data.projectId}` === `${selectedProjectId}`
     );
   }, [nodes, selectedProjectId]);
 
+  // Add status change handler to nodes
   const enhanceNodesWithStatusHandler = (nodes) => {
     return nodes.map((node) => ({
       ...node,
@@ -384,27 +378,27 @@ const Content = ({ selectedProjectId }) => {
     setNodeId(node.id);
     setNodeColor("transparent");
     setStatus(node.data.status || "");
+    setStuckReason(node.data.stuckReason || "");
 
     try {
       const res = await api.get(`/nodes/${node.id}/todos`);
-      const data = res.data; // Axios gives parsed response here
-
-      setTodos(data);
-      setNodeDescription(node.data.description || ""); // fallback
-      console.log("description is -->" + node.data.description);
-      setIsCompleted(node.data.status === "COMPLETED");
+      setTodos(res.data);
+      setNodeDescription(node.data.description || "");
+      setIsCompleted(node.data.status === "completed");
       setShowModal(true);
     } catch (error) {
       console.error("Failed to fetch todos", error);
     }
   }, []);
 
+  // Toggle todo completion status
   const onToggleTodo = async (todoId) => {
     await api.post(`/todos/${todoId}/toggle`);
     const res = await api.get(`/nodes/${nodeId}/todos`);
-    setTodos(res.data); // No need for res.json() if you're using axios
+    setTodos(res.data);
   };
 
+  // Mark node as completed
   const onMarkCompleted = async () => {
     try {
       await api.post(`/nodes/${nodeId}/complete`);
@@ -420,7 +414,6 @@ const Content = ({ selectedProjectId }) => {
       );
       showSuccess("Node marked as completed successfully!");
     } catch (error) {
-      // If error response is from backend, show an alert
       if (error.response && error.response.data) {
         showError(
           error.response.data.message ||
@@ -432,6 +425,7 @@ const Content = ({ selectedProjectId }) => {
     }
   };
 
+  // Add a new todo to node
   const onAddTodo = async (newTask) => {
     const localMemberId = localStorage.getItem("memberId");
     await api.post(`/nodes/${nodeId}/todos`, {
@@ -441,9 +435,9 @@ const Content = ({ selectedProjectId }) => {
     const res = await api.get(`/nodes/${nodeId}/todos`);
     setTodos(res.data);
     showSuccess("Added new todo");
-
   };
 
+  // Change node status
   const onStatusChange = (newStatus) => {
     if (!nodeId) return;
 
@@ -463,36 +457,79 @@ const Content = ({ selectedProjectId }) => {
     const colorMap = {
       pending: "#3b82f6",
       stuck: "#facc15",
-      completed: "green",
+      completed: "#10b981",
     };
 
     setNodeColor(colorMap[newStatus] || "#ffffff");
     setStatus(newStatus);
 
+    // Clear stuck reason if status is not stuck
+    if (newStatus !== "stuck") {
+      setStuckReason("");
+    }
+
     setNodes((prevNodes) =>
       prevNodes.map((n) =>
         n.id === nodeId
-          ? { ...n, data: { ...n.data, status: newStatus } }
+          ? { 
+              ...n, 
+              data: { 
+                ...n.data, 
+                status: newStatus,
+                stuckReason: newStatus === "stuck" ? n.data.stuckReason : ""
+              } 
+            }
           : n
       )
     );
   };
 
+  // Update stuck reason
+  const onStuckReasonChange = async (reason) => {
+    setStuckReason(reason);
+    
+    try {
+      await api.post(`/nodes/${nodeId}/update-stuck-reason`, { stuckReason: reason });
+      
+      setNodes((prevNodes) =>
+        prevNodes.map((n) =>
+          n.id === nodeId
+            ? {
+                ...n,
+                data: {
+                  ...n.data,
+                  stuckReason: reason,
+                },
+              }
+            : n
+        )
+      );
+      showSuccess("Updated stuck reason");
+    } catch (err) {
+      console.error("Error updating stuck reason:", err);
+      showError("Failed to update reason");
+    }
+  };
+
+  // Edge styling
   const edgeStyle = {
     type: 'bezier',
     animated: true,
     style: {
-      stroke: 'black',
+      stroke: '#64748b',
       strokeWidth: 2,
-      filter: 'drop-shadow(1px 1px 2px rgba(0,0,0,0.3))',
+      filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.2))',
       strokeDasharray: '5 5',
     },
     markerEnd: {
       type: MarkerType.ArrowClosed,
-      color: 'black',
+      color: '#64748b',
+      width: 20,
+      height: 20,
     },
   };
 
+  // Custom connection line
   const customEdgeLine = ({ fromX, fromY, toX, toY }) => {
     const [edgePath] = getBezierPath({
       sourceX: fromX,
@@ -504,14 +541,18 @@ const Content = ({ selectedProjectId }) => {
     return (
       <path
         d={edgePath}
-        stroke="blue"
+        stroke="#3b82f6"
         strokeWidth={2}
         fill="none"
-        style={{ strokeDasharray: '5 5' }}
+        style={{ 
+          strokeDasharray: '5 5',
+          filter: 'drop-shadow(0 1px 2px rgba(59, 130, 246, 0.3))'
+        }}
       />
     );
   };
 
+  // Update node deadline
   const onDeadlineChange = async (newDeadline) => {
     try {
       await api.post(`/nodes/${nodeId}/update-deadline`, { deadline: newDeadline });
@@ -532,7 +573,7 @@ const Content = ({ selectedProjectId }) => {
       console.error("Error updating deadline:", err);
       throw err;
     }
-  }
+  };
 
   return (
     <ReactFlow
@@ -554,6 +595,8 @@ const Content = ({ selectedProjectId }) => {
       onPaneClick={onPaneClick}
       onNodeContextMenu={onNodeContextMenu}
       nodeTypes={nodeTypes}
+      proOptions={{ hideAttribution: true }}
+      fitView
     >
       {/* Rightside panel */}
       <RightsidePanel
@@ -569,11 +612,39 @@ const Content = ({ selectedProjectId }) => {
         onClick={handleDownload}
       />
 
-      <Controls />
-      <MiniMap zoomable pannable />
-      <Background variant="lines" gap={30} color="#aaa" lineWidth={0.3} />
+      <Panel position="top-left" className="bg-white bg-opacity-80 p-2 rounded-lg shadow-md">
+        <div className="text-sm font-semibold text-gray-700">
+          {selectedProjectId ? `Project Flow - ID: ${selectedProjectId}` : 'No Project Selected'}
+        </div>
+      </Panel>
 
-      {/* node properties on right click */}
+      <Controls className="bg-white bg-opacity-90 rounded-lg shadow-lg" />
+      
+      <MiniMap 
+        zoomable 
+        pannable 
+        className="rounded-lg shadow-lg overflow-hidden" 
+        nodeBorderRadius={8}
+        nodeColor={(node) => {
+          const statusColors = {
+            completed: '#10b981',
+            pending: '#3b82f6',
+            stuck: '#facc15',
+            unpicked: '#94a3b8'
+          };
+          return statusColors[node.data?.status] || '#ffffff';
+        }}
+      />
+      
+      <Background 
+        variant="lines" 
+        gap={24} 
+        size={1} 
+        color="#cbd5e1" 
+        style={{ backgroundColor: '#f8fafc' }} 
+      />
+
+      {/* Node properties on right click */}
       {menu && <NodeProperties onClick={onPaneClick} {...menu} />}
 
       <Nodecard
@@ -592,6 +663,8 @@ const Content = ({ selectedProjectId }) => {
         onStatusChange={onStatusChange}
         nodeData={selectedNode?.data}
         onDeadlineChange={onDeadlineChange}
+        stuckReason={stuckReason}
+        onStuckReasonChange={onStuckReasonChange}
       />
     </ReactFlow>
   );
@@ -602,14 +675,17 @@ const ReactFlowProviderContent = ({ selectedProjectId }) => {
 
   return (
     <ReactFlowProvider>
-      <div
-        className={`flex flex-col h-[calc(97vh-74px)] overflow-x-hidden ${isSidebarOpen ? "mr-64" : ""
-          }`}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className={`flex flex-col h-[calc(97vh-74px)] overflow-x-hidden ${
+          isSidebarOpen ? "mr-64" : ""
+        }`}
       >
         <Content selectedProjectId={selectedProjectId} />
-      </div>
+      </motion.div>
     </ReactFlowProvider>
-
   );
 };
 

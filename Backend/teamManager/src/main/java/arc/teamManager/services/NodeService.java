@@ -54,4 +54,14 @@ public class NodeService {
         }
     }
 
+    public void updateStuckReason(String nodeId, String stuckReason) {
+        Optional<GraphNode> optionalNode = nodeRepo.findById(nodeId);
+        if (optionalNode.isPresent()) {
+            GraphNode node = optionalNode.get();
+            node.setStuckReason(stuckReason);
+            nodeRepo.save(node);
+        } else {
+            throw new RuntimeException("GraphNode not found with ID: " + nodeId);
+        }
+    }
 }
