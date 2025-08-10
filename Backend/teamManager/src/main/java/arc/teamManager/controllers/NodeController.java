@@ -21,8 +21,10 @@ import arc.teamManager.entities.GraphEdge;
 import arc.teamManager.entities.GraphNode;
 import arc.teamManager.entities.Todo;
 import arc.teamManager.models.GraphDataRequest;
+import arc.teamManager.models.MailRequest;
 import arc.teamManager.repositories.EdgeRepository;
 import arc.teamManager.repositories.NodeRepository;
+import arc.teamManager.services.EmailService;
 import arc.teamManager.services.NodeService;
 import arc.teamManager.services.TodoService;
 
@@ -40,12 +42,21 @@ public class NodeController {
     @Autowired
     private NodeService nodeService;
 
+    @Autowired
+    private EmailService mailService;
+
     Logger log = LoggerFactory.getLogger(this.getClass());
 
     @PostMapping("/save")
     public ResponseEntity<?> saveGraph(@RequestBody GraphDataRequest request) {
         nodeRepo.saveAll(request.getNodes());
         edgeRepo.saveAll(request.getEdges());
+        return ResponseEntity.ok("Saved successfully");
+    }
+
+    @PostMapping("/mail")
+    public ResponseEntity<?> mailAlert(@RequestBody MailRequest request) {
+        mailService.sendTaskAssignedEmail("surajsanjaykotagi@gmail.com", request.getNode().getData().getAssignedBy(), request.getNode().getData().getTask(), request.getNode().getData().getDescription());
         return ResponseEntity.ok("Saved successfully");
     }
 

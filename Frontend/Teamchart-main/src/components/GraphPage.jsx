@@ -295,6 +295,9 @@ const Content = ({ selectedProjectId }) => {
       color: "#ffffff" 
     });
     
+    await api.post(`/mail`, {
+      node: newNode
+    });
     await saveGraphNoAlert(updatedNodes, edges);
     showSuccess('Node created successfully');
   };
@@ -638,7 +641,7 @@ const Content = ({ selectedProjectId }) => {
       
       <Background 
         variant="lines" 
-        gap={24} 
+        gap={30} 
         size={1} 
         color="#cbd5e1" 
         style={{ backgroundColor: '#f8fafc' }} 
